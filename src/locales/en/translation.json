@@ -1,0 +1,46 @@
+{
+  "appTitle": "WorkTimer",
+  "stats": {
+    "title": "Time Statistics",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "hours": "Hours",
+    "days": "Days",
+    "hoursUnit": "hours",
+    "daysUnit": "days",
+    "hoursPerDay": "{{hours}} hours = 1 day",
+    "dailyWorkHoursSetting": "Daily Work Hours Setting",
+    "hoursPerDayUnit": " hours/day"
+  },
+  "form": {
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "description": "Description",
+    "placeholder": {
+      "startTime": "19:00",
+      "endTime": "01:00",
+      "description": "What did you work on?"
+    },
+    "validation": {
+      "startTimeRequired": "Please input start time!",
+      "endTimeRequired": "Please input end time!",
+      "descriptionRequired": "Please input description!"
+    },
+    "saveButton": "Save Entry",
+    "updateButton": "Update Entry",
+    "success": "Time entry added successfully!",
+    "editSuccess": "Time entry updated successfully!",
+    "addEntry": "Add Entry",
+    "editEntry": "Edit Entry"
+  },
+  "entries": {
+    "delete": "Delete",
+    "edit": "Edit",
+    "start": "Start",
+    "end": "End",
+    "duration": "Duration",
+    "deleteSuccess": "Time entry deleted successfully!",
+    "timeRecords": "Time Records",
+    "more": "more"
+  }
+} 

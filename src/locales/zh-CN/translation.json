@@ -1,0 +1,46 @@
+{
+  "appTitle": "工时管家",
+  "stats": {
+    "title": "工时统计",
+    "thisWeek": "本周",
+    "thisMonth": "本月",
+    "hours": "小时",
+    "days": "天数",
+    "hoursUnit": "小时",
+    "daysUnit": "天",
+    "hoursPerDay": "{{hours}}小时 = 1天",
+    "dailyWorkHoursSetting": "每日工时设置",
+    "hoursPerDayUnit": " 小时/天"
+  },
+  "form": {
+    "startTime": "开始时间",
+    "endTime": "结束时间",
+    "description": "工作内容",
+    "placeholder": {
+      "startTime": "19:00",
+      "endTime": "01:00",
+      "description": "你做了什么工作？"
+    },
+    "validation": {
+      "startTimeRequired": "请输入开始时间！",
+      "endTimeRequired": "请输入结束时间！",
+      "descriptionRequired": "请输入工作内容！"
+    },
+    "saveButton": "保存记录",
+    "updateButton": "更新记录",
+    "success": "工时记录添加成功！",
+    "editSuccess": "工时记录更新成功！",
+    "addEntry": "添加记录",
+    "editEntry": "编辑记录"
+  },
+  "entries": {
+    "delete": "删除",
+    "edit": "编辑",
+    "start": "开始",
+    "end": "结束",
+    "duration": "时长",
+    "deleteSuccess": "工时记录删除成功！",
+    "timeRecords": "工时记录",
+    "more": "更多"
+  }
+} 
