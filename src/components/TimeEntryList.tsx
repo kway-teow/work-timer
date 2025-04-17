@@ -12,9 +12,10 @@ interface TimeEntryListProps {
   onDelete: (id: string) => void;
   onEdit: (entry: TimeEntry) => void;
   showAsDays: boolean;
+  isMobile?: boolean;
 }
 
-const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete, onEdit, showAsDays }) => {
+const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete, onEdit, showAsDays, isMobile = false }) => {
   const { t } = useTranslation();
 
   const formatDate = (dateStr: string): string => {
@@ -55,11 +56,13 @@ const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete, onEdit
       renderItem={(entry) => (
         <List.Item
           key={entry.id}
-          style={{ padding: '8px 0' }}
+          style={{ padding: isMobile ? '4px 0' : '8px 0' }}
+          className={isMobile ? 'mobile-full-width' : ''}
         >
           <Card 
             style={{ width: '100%' }}
-            bodyStyle={{ padding: '16px' }}
+            bodyStyle={{ padding: isMobile ? '12px' : '16px' }}
+            size={isMobile ? 'small' : 'default'}
             actions={[
               <Tooltip title={t('entries.edit')} key="edit">
                 <EditOutlined key="edit" onClick={() => onEdit(entry)} />
@@ -69,19 +72,37 @@ const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete, onEdit
               </Tooltip>
             ]}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
-                <Text type="secondary">{formatDate(entry.startTime)}</Text>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: isMobile ? 'column' : 'row',
+              justifyContent: 'space-between',
+              gap: isMobile ? '8px' : undefined
+            }}>
+              <div style={{ 
+                flex: 1, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: isMobile ? 'center' : 'flex-start', 
+                gap: '4px'
+              }}>
+                <Text type="secondary" className={isMobile ? 'xs-small-text' : ''}>{formatDate(entry.startTime)}</Text>
                 <Text strong>{formatTimeRange(entry.startTime, entry.endTime || '')}</Text>
                 <Paragraph 
                   ellipsis={{ rows: 1, expandable: true, symbol: t('entries.more') }}
-                  style={{ marginBottom: 0, textAlign: 'left' }}
+                  style={{ marginBottom: 0, textAlign: isMobile ? 'center' : 'left' }}
+                  className={isMobile ? 'xs-small-text' : ''}
                 >
                   {entry.description}
                 </Paragraph>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', marginLeft: '12px' }}>
-                <Text strong style={{ fontSize: '16px' }}>
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: isMobile ? 'center' : 'flex-end',
+                marginLeft: isMobile ? '0' : '12px',
+                marginTop: isMobile ? '8px' : '0'
+              }}>
+                <Text strong style={{ fontSize: isMobile ? '14px' : '16px' }}>
                   {formatDuration(entry.duration)}
                 </Text>
               </div>

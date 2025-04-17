@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Typography, Button, Modal, message } from 'antd';
+import { Layout, Typography, Button, Modal, message, Grid } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import TimeEntryForm from './TimeEntryForm';
@@ -11,9 +11,13 @@ import { getStartOfWeek, getStartOfMonth, calculateStats } from '../utils/timeUt
 
 const { Content } = Layout;
 const { Title } = Typography;
+const { useBreakpoint } = Grid;
 
 const TimeTracker: React.FC = () => {
   const { t } = useTranslation();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+  
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [weeklyStats, setWeeklyStats] = useState<TimeStatsType>({
     totalHours: 0,
@@ -92,9 +96,21 @@ const TimeTracker: React.FC = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Content style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Title level={2}>{t('appTitle')}</Title>
+      <Content style={{ 
+        padding: isMobile ? '12px' : '24px', 
+        maxWidth: '1200px', 
+        margin: '0 auto',
+        width: '100%'
+      }}>
+        <div className={isMobile ? 'mobile-stack' : ''} style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: isMobile ? 'flex-start' : 'center', 
+          marginBottom: isMobile ? 12 : 16 
+        }}>
+          <Title level={isMobile ? 3 : 2} className={isMobile ? 'mobile-margin-bottom' : ''}>
+            {t('appTitle')}
+          </Title>
           <LanguageSwitcher />
         </div>
 
@@ -103,14 +119,23 @@ const TimeTracker: React.FC = () => {
           monthlyStats={monthlyStats} 
           showAsDays={showAsDays}
           setShowAsDays={setShowAsDays}
+          isMobile={isMobile}
         />
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Title level={4}>{t('entries.timeRecords')}</Title>
+        <div className={isMobile ? 'mobile-stack' : ''} style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: isMobile ? 'flex-start' : 'center', 
+          marginBottom: isMobile ? 12 : 16 
+        }}>
+          <Title level={4} className={isMobile ? 'mobile-margin-bottom' : ''}>
+            {t('entries.timeRecords')}
+          </Title>
           <Button 
             type="primary" 
             icon={<PlusOutlined />} 
             onClick={showModal}
+            size={isMobile ? 'middle' : 'large'}
           >
             {t('form.addEntry')}
           </Button>
@@ -121,6 +146,7 @@ const TimeTracker: React.FC = () => {
           onDelete={handleDeleteEntry}
           onEdit={handleEditEntry}
           showAsDays={showAsDays}
+          isMobile={isMobile}
         />
 
         <Modal
@@ -129,10 +155,14 @@ const TimeTracker: React.FC = () => {
           footer={null}
           onCancel={handleCancel}
           destroyOnClose={true}
+          width={isMobile ? '95%' : 520}
+          style={{ maxWidth: '100vw', margin: isMobile ? '10px auto' : '100px auto' }}
+          bodyStyle={{ padding: isMobile ? '12px' : '24px' }}
         >
           <TimeEntryForm 
             onSubmit={handleAddEntry} 
             initialValues={editingEntry}
+            isMobile={isMobile}
           />
         </Modal>
       </Content>

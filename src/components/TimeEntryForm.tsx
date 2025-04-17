@@ -11,6 +11,7 @@ const { TextArea } = Input;
 interface TimeEntryFormProps {
   onSubmit: (entry: TimeEntry) => void;
   initialValues?: TimeEntry | null;
+  isMobile?: boolean;
 }
 
 interface FormValues {
@@ -19,7 +20,7 @@ interface FormValues {
   description: string;
 }
 
-const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit, initialValues }) => {
+const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit, initialValues, isMobile = false }) => {
   const { t } = useTranslation();
   const [form] = Form.useForm();
   const [startDate] = useState<Date>(new Date());
@@ -72,25 +73,32 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit, initialValues }
   
   const timeItemStyle = { 
     display: 'flex', 
-    alignItems: 'center',
-    marginBottom: 16
+    flexDirection: isMobile ? 'column' as const : 'row' as const,
+    alignItems: isMobile ? 'flex-start' as const : 'center' as const,
+    marginBottom: isMobile ? 12 : 16
   };
   
   const labelStyle = { 
-    width: '80px', 
-    textAlign: 'right' as const, 
-    marginRight: '12px', 
+    width: isMobile ? '100%' : '80px', 
+    textAlign: isMobile ? 'left' as const : 'right' as const, 
+    marginRight: isMobile ? '0' : '12px',
+    marginBottom: isMobile ? '4px' : '0', 
     flexShrink: 0 
   };
 
   return (
-    <Form form={form} onFinish={handleSubmit} layout="horizontal">
+    <Form 
+      form={form} 
+      onFinish={handleSubmit} 
+      layout={isMobile ? "vertical" : "horizontal"}
+      size={isMobile ? "middle" : "large"}
+    >
       <div style={timeItemStyle}>
         <div style={labelStyle}>{t('form.startTime')}</div>
         <Form.Item
           name="startTime"
           rules={[{ required: true, message: t('form.validation.startTimeRequired') }]}
-          style={{ flex: 1, marginBottom: 0 }}
+          style={{ flex: 1, marginBottom: 0, width: isMobile ? '100%' : undefined }}
           colon={false}
         >
           <TimePicker 
@@ -98,6 +106,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit, initialValues }
             placeholder={t('form.placeholder.startTime')} 
             style={{ width: '100%' }}
             minuteStep={5}
+            size={isMobile ? "middle" : "large"}
           />
         </Form.Item>
       </div>
@@ -107,7 +116,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit, initialValues }
         <Form.Item
           name="endTime"
           rules={[{ required: true, message: t('form.validation.endTimeRequired') }]}
-          style={{ flex: 1, marginBottom: 0 }}
+          style={{ flex: 1, marginBottom: 0, width: isMobile ? '100%' : undefined }}
           colon={false}
         >
           <TimePicker 
@@ -115,6 +124,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit, initialValues }
             placeholder={t('form.placeholder.endTime')} 
             style={{ width: '100%' }}
             minuteStep={5}
+            size={isMobile ? "middle" : "large"}
           />
         </Form.Item>
       </div>
@@ -123,12 +133,22 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit, initialValues }
         label={t('form.description')}
         name="description"
         rules={[{ required: true, message: t('form.validation.descriptionRequired') }]}
+        labelCol={isMobile ? { span: 24 } : { span: 4 }}
+        wrapperCol={isMobile ? { span: 24 } : { span: 20 }}
       >
-        <TextArea rows={4} placeholder={t('form.placeholder.description')} />
+        <TextArea 
+          rows={isMobile ? 3 : 4} 
+          placeholder={t('form.placeholder.description')} 
+        />
       </Form.Item>
       
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
+      <Form.Item style={{ textAlign: isMobile ? 'center' as const : 'left' as const }}>
+        <Button 
+          type="primary" 
+          htmlType="submit"
+          size={isMobile ? "middle" : "large"}
+          block={isMobile}
+        >
           {initialValues ? t('form.updateButton') : t('form.saveButton')}
         </Button>
       </Form.Item>
