@@ -7,6 +7,7 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/pages.yml'
+      - 'vite.config.ts'
       
 jobs:
   deploy-pages:
