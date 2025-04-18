@@ -1,0 +1,48 @@
+/* Tailwind CSS */
+@import "tailwindcss";
+
+/* Global styles */
+:root {
+  --min-page-width: 320px;
+}
+
+html, body {
+  min-width: var(--min-page-width);
+  overflow-x: auto;
+}
+
+/* Ensure content area has minimum width */
+.ant-layout-content {
+  min-width: var(--min-page-width);
+}
+
+/* Card content minimum width */
+.ant-card, .ant-card-body {
+  min-width: calc(var(--min-page-width) - 48px); /* Subtract padding space */
+}
+
+/* Ensure single lines don't break due to minimum width issues */
+.ant-card-head-title {
+  white-space: normal !important;
+}
+
+/* Improved mobile compatibility */
+@media (max-width: 480px) {
+  .ant-segmented {
+    font-size: 12px;
+  }
+  
+  .ant-card {
+    border-radius: 8px;
+  }
+  
+  /* Adapt form elements for mobile */
+  .ant-form-item-label {
+    padding-bottom: 4px;
+  }
+}
+
+/* Custom button radius */
+.rounded-button {
+  border-radius: 0.5rem !important;
+}

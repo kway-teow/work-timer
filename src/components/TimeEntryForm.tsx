@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, memo, useCallback } from 'react';
 import { Form, Input, Button, TimePicker } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { Dayjs } from 'dayjs';
@@ -11,7 +11,6 @@ const { TextArea } = Input;
 interface TimeEntryFormProps {
   onSubmit: (entry: TimeEntry) => void;
   initialValues?: TimeEntry | null;
-  isMobile?: boolean;
 }
 
 interface FormValues {
@@ -20,10 +19,16 @@ interface FormValues {
   description: string;
 }
 
-const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit, initialValues, isMobile = false }) => {
-  const { t } = useTranslation();
+// 使用memo包装组件，减少不必要的重渲染
+const TimeEntryForm: React.FC<TimeEntryFormProps> = memo(({ onSubmit, initialValues }) => {
+  const { t, i18n } = useTranslation();
   const [form] = Form.useForm();
   const [startDate] = useState<Date>(new Date());
+
+  // 根据当前语言设置时间格式
+  const format = useMemo(() => {
+    return i18n.language === 'zh-CN' ? 'HH:mm' : 'h:mm A';
+  }, [i18n.language]);
 
   // Set form values when initialValues changes
   useEffect(() => {
@@ -41,7 +46,18 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit, initialValues, 
     }
   }, [initialValues, form]);
 
-  const handleSubmit = (values: FormValues) => {
+  // 当语言变化时重新设置form值，确保时间格式正确显示
+  useEffect(() => {
+    if (form.getFieldValue('startTime')) {
+      const currentValues = form.getFieldsValue();
+      form.setFieldsValue({
+        ...currentValues
+      });
+    }
+  }, [i18n.language, form]);
+
+  // 使用useCallback优化表单提交函数
+  const handleSubmit = useCallback((values: FormValues) => {
     // Create date objects with current date but with hours and minutes from the selected times
     const startTime = new Date(startDate);
     startTime.setHours(values.startTime.hour());
@@ -67,93 +83,91 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ onSubmit, initialValues, 
     };
     
     onSubmit(entry);
-  };
-
-  const format = 'HH:mm';
-  
-  const timeItemStyle = { 
-    display: 'flex', 
-    flexDirection: isMobile ? 'column' as const : 'row' as const,
-    alignItems: isMobile ? 'flex-start' as const : 'center' as const,
-    marginBottom: isMobile ? 12 : 16
-  };
-  
-  const labelStyle = { 
-    width: isMobile ? '100%' : '80px', 
-    textAlign: isMobile ? 'left' as const : 'right' as const, 
-    marginRight: isMobile ? '0' : '12px',
-    marginBottom: isMobile ? '4px' : '0', 
-    flexShrink: 0 
-  };
+  }, [initialValues, onSubmit, startDate]);
 
   return (
     <Form 
       form={form} 
       onFinish={handleSubmit} 
-      layout={isMobile ? "vertical" : "horizontal"}
-      size={isMobile ? "middle" : "large"}
+      layout="vertical"
+      className="w-full"
+      size="middle"
+      rootClassName="md:text-base"
     >
-      <div style={timeItemStyle}>
-        <div style={labelStyle}>{t('form.startTime')}</div>
+      <div className="flex flex-col mb-3 md:mb-4">
+        <div className="w-full font-medium mb-1">
+          {t('form.startTime')}
+        </div>
         <Form.Item
           name="startTime"
           rules={[{ required: true, message: t('form.validation.startTimeRequired') }]}
-          style={{ flex: 1, marginBottom: 0, width: isMobile ? '100%' : undefined }}
+          className="mb-0 w-full"
           colon={false}
         >
           <TimePicker 
-            format={format} 
+            format={format}
             placeholder={t('form.placeholder.startTime')} 
-            style={{ width: '100%' }}
+            className="w-full"
             minuteStep={5}
-            size={isMobile ? "middle" : "large"}
+            size="middle"
+            use12Hours={i18n.language !== 'zh-CN'}
+            popupClassName="!z-[1100]"
           />
         </Form.Item>
       </div>
       
-      <div style={timeItemStyle}>
-        <div style={labelStyle}>{t('form.endTime')}</div>
+      <div className="flex flex-col mb-3 md:mb-4">
+        <div className="w-full font-medium mb-1">
+          {t('form.endTime')}
+        </div>
         <Form.Item
           name="endTime"
           rules={[{ required: true, message: t('form.validation.endTimeRequired') }]}
-          style={{ flex: 1, marginBottom: 0, width: isMobile ? '100%' : undefined }}
+          className="mb-0 w-full"
           colon={false}
         >
           <TimePicker 
-            format={format} 
+            format={format}
             placeholder={t('form.placeholder.endTime')} 
-            style={{ width: '100%' }}
+            className="w-full"
             minuteStep={5}
-            size={isMobile ? "middle" : "large"}
+            size="middle"
+            use12Hours={i18n.language !== 'zh-CN'}
+            popupClassName="!z-[1100]"
           />
         </Form.Item>
       </div>
       
       <Form.Item
-        label={t('form.description')}
+        label={<span className="font-medium">{t('form.description')}</span>}
         name="description"
         rules={[{ required: true, message: t('form.validation.descriptionRequired') }]}
-        labelCol={isMobile ? { span: 24 } : { span: 4 }}
-        wrapperCol={isMobile ? { span: 24 } : { span: 20 }}
+        labelCol={{ span: 24 }}
+        wrapperCol={{ span: 24 }}
+        className="mb-4"
       >
         <TextArea 
-          rows={isMobile ? 3 : 4} 
+          rows={3} 
           placeholder={t('form.placeholder.description')} 
+          className="resize-none"
         />
       </Form.Item>
       
-      <Form.Item style={{ textAlign: isMobile ? 'center' as const : 'left' as const }}>
+      <Form.Item className="text-center md:text-left mb-0">
         <Button 
           type="primary" 
           htmlType="submit"
-          size={isMobile ? "middle" : "large"}
-          block={isMobile}
+          size="middle"
+          className="w-full md:w-auto px-6"
         >
           {initialValues ? t('form.updateButton') : t('form.saveButton')}
         </Button>
       </Form.Item>
     </Form>
   );
-};
+});
+
+// 添加显示名称以方便调试
+TimeEntryForm.displayName = 'TimeEntryForm';
 
 export default TimeEntryForm; 

@@ -1,9 +1,9 @@
-import React from 'react';
-import { List, Typography, Card, Tooltip } from 'antd';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import React, { useMemo, memo } from 'react';
+import { List, Typography, Card, Tooltip, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { TimeEntry } from '../types';
 import { HOURS_PER_DAY } from '../utils/timeUtils';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 
 const { Text, Paragraph } = Typography;
 
@@ -12,57 +12,65 @@ interface TimeEntryListProps {
   onDelete: (id: string) => void;
   onEdit: (entry: TimeEntry) => void;
   showAsDays: boolean;
-  isMobile?: boolean;
 }
 
-const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete, onEdit, showAsDays, isMobile = false }) => {
-  const { t } = useTranslation();
+// 使用memo减少不必要的重渲染
+const TimeEntryList: React.FC<TimeEntryListProps> = memo(({ entries, onDelete, onEdit, showAsDays }) => {
+  const { t, i18n } = useTranslation();
+  
+  // 使用useMemo缓存格式化函数，只在语言变化时重新创建
+  const formatters = useMemo(() => {
+    const locale = i18n.language === 'zh-CN' ? 'zh-CN' : 'en-US';
+    
+    const formatDate = (dateStr: string): string => {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString(locale, {
+        month: '2-digit',
+        day: '2-digit'
+      });
+    };
 
-  const formatDate = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    });
-  };
+    const formatTime = (dateStr: string): string => {
+      const date = new Date(dateStr);
+      return date.toLocaleTimeString(locale, {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: i18n.language !== 'zh-CN'
+      });
+    };
 
-  const formatTime = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString('zh-CN', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-  };
+    const formatTimeRange = (startTime: string, endTime: string): string => {
+      return `${formatTime(startTime)} - ${formatTime(endTime || '')}`;
+    };
+    
+    return {
+      formatDate,
+      formatTime,
+      formatTimeRange
+    };
+  }, [i18n.language]);
 
-  const formatTimeRange = (startTime: string, endTime: string): string => {
-    return `${formatTime(startTime)} - ${formatTime(endTime || '')}`;
-  };
+  // 预定义空状态文本
+  const emptyText = useMemo(() => t('entries.noEntries', 'No entries yet'), [t]);
 
-  const formatDuration = (minutes: number): string => {
-    if (showAsDays) {
-      const days = minutes / 60 / HOURS_PER_DAY;
-      return `${days.toFixed(1)} ${t('stats.daysUnit')}`;
-    } else {
-      const hours = minutes / 60;
-      return `${hours.toFixed(1)} ${t('stats.hoursUnit')}`;
-    }
-  };
+  // 卡片样式缓存
+  const cardBodyStyle = useMemo(() => ({ 
+    body: { padding: '0.75rem 0.75rem' } 
+  }), []);
 
   return (
     <List
       dataSource={entries}
+      locale={{ emptyText }}
       renderItem={(entry) => (
         <List.Item
           key={entry.id}
-          style={{ padding: isMobile ? '4px 0' : '8px 0' }}
-          className={isMobile ? 'mobile-full-width' : ''}
+          className="py-1 w-full"
         >
           <Card 
-            style={{ width: '100%' }}
-            bodyStyle={{ padding: isMobile ? '12px' : '16px' }}
-            size={isMobile ? 'small' : 'default'}
+            className="w-full"
+            styles={cardBodyStyle}
+            size="small"
             actions={[
               <Tooltip title={t('entries.edit')} key="edit">
                 <EditOutlined key="edit" onClick={() => onEdit(entry)} />
@@ -72,39 +80,41 @@ const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete, onEdit
               </Tooltip>
             ]}
           >
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: isMobile ? 'column' : 'row',
-              justifyContent: 'space-between',
-              gap: isMobile ? '8px' : undefined
-            }}>
-              <div style={{ 
-                flex: 1, 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: isMobile ? 'center' : 'flex-start', 
-                gap: '4px'
-              }}>
-                <Text type="secondary" className={isMobile ? 'xs-small-text' : ''}>{formatDate(entry.startTime)}</Text>
-                <Text strong>{formatTimeRange(entry.startTime, entry.endTime || '')}</Text>
+            <div className="flex">
+              {/* 左侧：工时和时间 */}
+              <div className="flex flex-col mr-4">
+                {/* 工时时长（突出显示）*/}
+                <div className="inline-flex items-end mb-1">
+                  <Text strong className="text-2xl md:text-3xl text-blue-600 font-bold mr-1">
+                    {showAsDays 
+                      ? (entry.duration / 60 / HOURS_PER_DAY).toFixed(1)
+                      : (entry.duration / 60).toFixed(1)
+                    }
+                  </Text>
+                  <Text type="secondary" className="text-xs">
+                    {showAsDays ? t('stats.daysUnit') : t('stats.hoursUnit')}
+                  </Text>
+                </div>
+                
+                {/* 时间范围（弱化显示）*/}
+                <Text type="secondary" className="text-xs opacity-60">
+                  {formatters.formatTimeRange(entry.startTime, entry.endTime || '')}
+                </Text>
+                
+                {/* 日期标签 */}
+                <Tag color="default" className="text-xs mt-1 rounded-sm opacity-70 w-fit">
+                  {formatters.formatDate(entry.startTime)}
+                </Tag>
+              </div>
+              
+              {/* 右侧：工作内容 */}
+              <div className="flex-1">
                 <Paragraph 
-                  ellipsis={{ rows: 1, expandable: true, symbol: t('entries.more') }}
-                  style={{ marginBottom: 0, textAlign: isMobile ? 'center' : 'left' }}
-                  className={isMobile ? 'xs-small-text' : ''}
+                  ellipsis={{ rows: 2, expandable: true, symbol: t('entries.more') }}
+                  className="mb-0 text-base w-full"
                 >
                   {entry.description}
                 </Paragraph>
-              </div>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: isMobile ? 'center' : 'flex-end',
-                marginLeft: isMobile ? '0' : '12px',
-                marginTop: isMobile ? '8px' : '0'
-              }}>
-                <Text strong style={{ fontSize: isMobile ? '14px' : '16px' }}>
-                  {formatDuration(entry.duration)}
-                </Text>
               </div>
             </div>
           </Card>
@@ -112,6 +122,9 @@ const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete, onEdit
       )}
     />
   );
-};
+});
+
+// 添加显示名称以方便调试
+TimeEntryList.displayName = 'TimeEntryList';
 
 export default TimeEntryList; 
