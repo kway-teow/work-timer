@@ -168,7 +168,6 @@ const WorkChart: React.FC<WorkChartProps> = ({ records }) => {
           },
           axisLabel: {
             color: '#666',
-            rotate: chartType === 'weekly' ? 0 : 0
           },
         },
         yAxis: {
