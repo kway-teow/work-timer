@@ -3,6 +3,7 @@
   "weeklyHours": "Weekly Hours",
   "monthlyHours": "Monthly Hours",
   "totalHours": "Total Hours",
+  "selectedMonthHours": "Selected Month Hours",
   "hours": "Hours",
   "days": "Days",
   "displayUnit": "Display Unit",

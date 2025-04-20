@@ -3,6 +3,7 @@
   "weeklyHours": "本周工时",
   "monthlyHours": "本月工时",
   "totalHours": "总工时",
+  "selectedMonthHours": "选定月份工时",
   "hours": "小时",
   "days": "天",
   "displayUnit": "显示单位",

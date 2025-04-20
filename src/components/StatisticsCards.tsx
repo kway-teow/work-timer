@@ -1,21 +1,30 @@
-import React from 'react';
-import { Card, Statistic, Switch, Select } from 'antd';
-import { ClockCircleOutlined, CalendarOutlined, GlobalOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { Card, Statistic, Switch, Select, DatePicker } from 'antd';
+import { ClockCircleOutlined, CalendarOutlined, GlobalOutlined, HistoryOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useConfigStore } from '../store/configStore';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
+import locale from 'antd/es/date-picker/locale/zh_CN';
+import enLocale from 'antd/es/date-picker/locale/en_US';
 
 interface StatisticsCardsProps {
   weeklyHours: number;
   monthlyHours: number;
   totalHours: number;
+  records: Array<{
+    startDate: string;
+    hours: number;
+  }>;
 }
 
 const StatisticsCards: React.FC<StatisticsCardsProps> = ({
   weeklyHours,
   monthlyHours,
   totalHours,
+  records,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { Option } = Select;
   
   // 从存储中获取显示偏好
@@ -28,28 +37,83 @@ const StatisticsCards: React.FC<StatisticsCardsProps> = ({
     setShowTotalStats 
   } = useConfigStore();
 
+  // 选择的月份和年份 (默认为当前月份)
+  const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
+
   // 根据每天工时设置将小时转换为天数
   const hoursToDays = (hours: number) => {
     return (hours / hoursPerDay).toFixed(1);
   };
 
+  // 计算选定月份/年份的工时
+  const getSelectedMonthHours = () => {
+    const startOfMonth = selectedDate.startOf('month');
+    const endOfMonth = selectedDate.endOf('month');
+    
+    return records.reduce((total, record) => {
+      const recordDate = dayjs(record.startDate);
+      if (recordDate.isBetween(startOfMonth, endOfMonth, null, '[]')) {
+        return total + record.hours;
+      }
+      return total;
+    }, 0);
+  };
+
+  // 所选月份/年份的工时
+  const selectedMonthHours = getSelectedMonthHours();
+
+  // 处理日期选择变化
+  const handleDateChange = (date: Dayjs | null) => {
+    if (date) {
+      setSelectedDate(date);
+    }
+  };
+
+  // 选择DatePicker的正确语言
+  const datePickerLocale = i18n.language === 'zh-CN' ? locale : enLocale;
+
   return (
     <>
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {showTotalStats ? (
-          <Card className="shadow-sm rounded-lg hover:shadow-md transition-shadow" hoverable>
-            <div className="flex items-center mb-2">
-              <GlobalOutlined className="text-green-500 mr-2" />
-              <span className="text-gray-600">{t('totalHours')}</span>
-            </div>
-            <Statistic
-              value={
-                showInDays ? hoursToDays(totalHours) : totalHours.toFixed(1)
-              }
-              suffix={showInDays ? t('days') : t('hours')}
-              valueStyle={{ color: '#10B981', fontWeight: 'bold' }}
-            />
-          </Card>
+          <>
+            <Card className="shadow-sm rounded-lg hover:shadow-md transition-shadow" hoverable>
+              <div className="flex items-center mb-2">
+                <GlobalOutlined className="text-green-500 mr-2" />
+                <span className="text-gray-600">{t('totalHours')}</span>
+              </div>
+              <Statistic
+                value={
+                  showInDays ? hoursToDays(totalHours) : totalHours.toFixed(1)
+                }
+                suffix={showInDays ? t('days') : t('hours')}
+                valueStyle={{ color: '#10B981', fontWeight: 'bold' }}
+              />
+            </Card>
+            <Card className="shadow-sm rounded-lg hover:shadow-md transition-shadow" hoverable>
+              <div className="flex items-center mb-2">
+                <HistoryOutlined className="text-orange-500 mr-2" />
+                <span className="text-gray-600">{t('selectedMonthHours')}</span>
+                <DatePicker 
+                  picker="month"
+                  locale={datePickerLocale}
+                  value={selectedDate}
+                  onChange={handleDateChange}
+                  allowClear={false}
+                  className="ml-2"
+                  size="small"
+                  format="YYYY年MM月"
+                />
+              </div>
+              <Statistic
+                value={
+                  showInDays ? hoursToDays(selectedMonthHours) : selectedMonthHours.toFixed(1)
+                }
+                suffix={showInDays ? t('days') : t('hours')}
+                valueStyle={{ color: '#F97316', fontWeight: 'bold' }}
+              />
+            </Card>
+          </>
         ) : (
           <>
             <Card className="shadow-sm rounded-lg hover:shadow-md transition-shadow" hoverable>

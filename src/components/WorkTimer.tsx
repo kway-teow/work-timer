@@ -171,6 +171,7 @@ const WorkTimer: React.FC = () => {
           weeklyHours={weeklyHours}
           monthlyHours={monthlyHours}
           totalHours={totalHours}
+          records={records}
         />
         
         {/* 视图选择器 */}
