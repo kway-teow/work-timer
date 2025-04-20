@@ -112,6 +112,8 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = memo(({ onSubmit, initialVal
             size="middle"
             use12Hours={i18n.language !== 'zh-CN'}
             popupClassName="!z-[1100]"
+            changeOnScroll
+            needConfirm={false}
           />
         </Form.Item>
       </div>
@@ -134,6 +136,8 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = memo(({ onSubmit, initialVal
             size="middle"
             use12Hours={i18n.language !== 'zh-CN'}
             popupClassName="!z-[1100]"
+            changeOnScroll
+            needConfirm={false}
           />
         </Form.Item>
       </div>

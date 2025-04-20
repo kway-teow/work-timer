@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Modal, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -12,122 +12,56 @@ import TimelineView from './TimelineView';
 import RecordsView from './RecordsView';
 import WorkRecordForm from './WorkRecordForm';
 import { WorkRecord } from '../types/WorkRecord';
+import { useConfigStore } from '../store/configStore';
 
 dayjs.extend(isBetween);
 
-// Global minimum width for consistent display
+// 全局最小宽度，用于一致的显示效果
 const MIN_WIDTH = '320px';
+
+// 工作记录的 localStorage 键名
+const STORAGE_KEY = 'workRecords';
 
 const WorkTimer: React.FC = () => {
   const { t } = useTranslation();
-  const [records, setRecords] = useState<WorkRecord[]>([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<WorkRecord | null>(null);
-  const [showInDays, setShowInDays] = useState(false);
-  const [hoursPerDay, setHoursPerDay] = useState(7); // Default: 7 hours per day
-  const [showChart, setShowChart] = useState(false);
-  const [showTimeline, setShowTimeline] = useState(false);
+  
+  // 从 Zustand store 获取配置状态
+  const { showChart, showTimeline } = useConfigStore();
+  
+  // 初始化时直接从localStorage读取
+  const initialRecords = (() => {
+    try {
+      const savedRecords = localStorage.getItem(STORAGE_KEY);
+      return savedRecords ? JSON.parse(savedRecords) : [];
+    } catch (error) {
+      console.error('加载保存的记录时出错:', error);
+      return [];
+    }
+  })();
 
-  // Load sample data on first render
-  useEffect(() => {
-    const sampleRecords: WorkRecord[] = [
-      {
-        id: '1',
-        startDate: '2025-04-18',
-        startTime: '09:00',
-        endDate: '2025-04-18',
-        endTime: '18:00',
-        description: '完成产品设计文档和用户调研报告',
-        hours: 9,
-      },
-      {
-        id: '2',
-        startDate: '2025-04-17',
-        startTime: '10:00',
-        endDate: '2025-04-17',
-        endTime: '19:30',
-        description: '参加项目启动会议，准备产品原型',
-        hours: 9.5,
-      },
-      {
-        id: '3',
-        startDate: '2025-04-16',
-        startTime: '14:00',
-        endDate: '2025-04-16',
-        endTime: '22:00',
-        description: '修复用户反馈的界面问题，优化交互流程',
-        hours: 8,
-      },
-      {
-        id: '4',
-        startDate: '2025-04-15',
-        startTime: '21:00',
-        endDate: '2025-04-16',
-        endTime: '01:30',
-        description: '紧急处理线上问题，跨夜加班',
-        hours: 4.5,
-      },
-      {
-        id: '5',
-        startDate: '2025-04-14',
-        startTime: '09:30',
-        endDate: '2025-04-14',
-        endTime: '18:30',
-        description: '进行用户访谈，整理需求文档',
-        hours: 9,
-      },
-    ];
-    setRecords(sampleRecords);
+  // 使用原始的useState，但不直接暴露setRecords
+  const [records, setRecordsState] = useState<WorkRecord[]>(initialRecords);
+  
+  // 创建一个包装过的setRecords函数，同时更新state和localStorage
+  const setRecords = useCallback((newRecords: WorkRecord[] | ((prev: WorkRecord[]) => WorkRecord[])) => {
+    // 处理函数参数情况
+    setRecordsState(prevRecords => {
+      const nextRecords = typeof newRecords === 'function' 
+        ? newRecords(prevRecords) 
+        : newRecords;
+      
+      // 保存到localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextRecords));
+      
+      return nextRecords;
+    });
   }, []);
 
-  // Open modal for creating or editing record
-  const showModal = (record?: WorkRecord) => {
-    if (record) {
-      setEditingRecord(record);
-    } else {
-      setEditingRecord(null);
-    }
-    setIsModalVisible(true);
-  };
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<WorkRecord | null>(null);
+  const [isCopying, setIsCopying] = useState(false); // 标记是否是复制操作
 
-  // Handle form cancel
-  const handleCancel = () => {
-    setIsModalVisible(false);
-    setEditingRecord(null);
-  };
-
-  // Handle form submission
-  const handleSubmit = (record: WorkRecord) => {
-    if (editingRecord) {
-      // Update existing record
-      setRecords(
-        records.map((r) => (r.id === editingRecord.id ? record : r))
-      );
-      message.success(t('recordUpdated'));
-    } else {
-      // Add new record
-      setRecords([record, ...records]);
-      message.success(t('recordAdded'));
-    }
-    setIsModalVisible(false);
-    setEditingRecord(null);
-  };
-
-  // Delete record
-  const deleteRecord = (id: string) => {
-    Modal.confirm({
-      title: t('confirmDelete'),
-      content: t('confirmDeleteMessage'),
-      okText: t('confirm'),
-      cancelText: t('cancel'),
-      onOk: () => {
-        setRecords(records.filter((record) => record.id !== id));
-        message.success(t('recordDeleted'));
-      },
-    });
-  };
-
-  // Calculate weekly hours
+  // 计算每周工时
   const getWeeklyHours = () => {
     const now = dayjs();
     const startOfWeek = now.startOf('week');
@@ -141,7 +75,7 @@ const WorkTimer: React.FC = () => {
     }, 0);
   };
 
-  // Calculate monthly hours
+  // 计算每月工时
   const getMonthlyHours = () => {
     const now = dayjs();
     const startOfMonth = now.startOf('month');
@@ -155,71 +89,129 @@ const WorkTimer: React.FC = () => {
     }, 0);
   };
 
+  // 计算所有记录的总工时
+  const getTotalHours = () => {
+    return records.reduce((total, record) => total + record.hours, 0);
+  };
+
   const weeklyHours = getWeeklyHours();
   const monthlyHours = getMonthlyHours();
+  const totalHours = getTotalHours();
+
+  // 打开创建或编辑记录的对话框
+  const showModal = (record?: WorkRecord) => {
+    if (record) {
+      // 检查是否是已有记录，还是复制的新记录
+      const existingRecord = records.find(r => r.id === record.id);
+      if (existingRecord) {
+        // 编辑现有记录
+        setIsCopying(false);
+        setEditingRecord(record);
+      } else {
+        // 复制的新记录
+        setIsCopying(true);
+        setEditingRecord(record);
+      }
+    } else {
+      // 添加新记录
+      setIsCopying(false);
+      setEditingRecord(null);
+    }
+    setIsModalVisible(true);
+  };
+
+  // 处理表单取消
+  const handleCancel = () => {
+    setIsModalVisible(false);
+    setEditingRecord(null);
+    setIsCopying(false);
+  };
+
+  // 处理表单提交
+  const handleSubmit = (record: WorkRecord) => {
+    if (editingRecord && !isCopying) {
+      // 更新现有记录
+      setRecords(
+        records.map((r) => (r.id === editingRecord.id ? record : r))
+      );
+      message.success(t('recordUpdated'));
+    } else {
+      // 添加新记录或复制的记录
+      setRecords([record, ...records]);
+      message.success(isCopying ? t('recordCopied') : t('recordAdded'));
+    }
+    setIsModalVisible(false);
+    setEditingRecord(null);
+    setIsCopying(false);
+  };
+
+  // 删除记录
+  const deleteRecord = (id: string) => {
+    Modal.confirm({
+      title: t('confirmDelete'),
+      content: t('confirmDeleteMessage'),
+      okText: t('confirm'),
+      cancelText: t('cancel'),
+      onOk: () => {
+        setRecords(records.filter((record) => record.id !== id));
+        message.success(t('recordDeleted'));
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ minWidth: MIN_WIDTH }}>
-      {/* Header */}
+      {/* 页头 */}
       <Header />
       
-      {/* Main content */}
+      {/* 主要内容 */}
       <div className="pt-16 px-4 pb-24" style={{ minWidth: MIN_WIDTH }}>
-        {/* Statistics */}
+        {/* 统计卡片 */}
         <StatisticsCards
           weeklyHours={weeklyHours}
           monthlyHours={monthlyHours}
-          showInDays={showInDays}
-          setShowInDays={setShowInDays}
-          hoursPerDay={hoursPerDay}
-          setHoursPerDay={setHoursPerDay}
+          totalHours={totalHours}
         />
         
-        {/* View selector */}
-        <ViewSelector
-          showChart={showChart}
-          showTimeline={showTimeline}
-          setShowChart={setShowChart}
-          setShowTimeline={setShowTimeline}
-        />
+        {/* 视图选择器 */}
+        <ViewSelector />
         
-        {/* View content based on selection */}
+        {/* 基于选择显示内容 */}
         {showChart ? (
           <WorkChart records={records} />
         ) : showTimeline ? (
           <TimelineView
             records={records}
-            showInDays={showInDays}
             onEdit={showModal}
             onDelete={deleteRecord}
-            hoursPerDay={hoursPerDay}
           />
         ) : (
           <RecordsView
             records={records}
-            showInDays={showInDays}
             onEdit={showModal}
             onDelete={deleteRecord}
-            hoursPerDay={hoursPerDay}
           />
         )}
       </div>
       
-      {/* Add button */}
+      {/* 添加按钮 */}
       <button
         className="fixed right-4 bottom-4 w-14 h-14 rounded-full bg-blue-500 text-white shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors rounded-button"
+        aria-label={t('addRecord')}
         onClick={() => showModal()}
       >
         <PlusOutlined style={{ fontSize: '24px' }} />
       </button>
-      
-      {/* Form modal */}
-      <WorkRecordForm
-        visible={isModalVisible}
-        editingRecord={editingRecord}
-        onCancel={handleCancel}
-        onSubmit={handleSubmit}
-      />
+
+      {/* 表单对话框 */}
+      {isModalVisible && (
+        <WorkRecordForm
+          visible={isModalVisible}
+          onCancel={handleCancel}
+          onSubmit={handleSubmit}
+          initialData={editingRecord}
+        />
+      )}
     </div>
   );
 };

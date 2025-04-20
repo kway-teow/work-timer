@@ -1,20 +1,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useConfigStore } from '../store/configStore';
 
-interface ViewSelectorProps {
-  showChart: boolean;
-  showTimeline: boolean;
-  setShowChart: (value: boolean) => void;
-  setShowTimeline: (value: boolean) => void;
-}
-
-const ViewSelector: React.FC<ViewSelectorProps> = ({
-  showChart,
-  showTimeline,
-  setShowChart,
-  setShowTimeline,
-}) => {
+const ViewSelector: React.FC = () => {
   const { t } = useTranslation();
+  const { 
+    showChart, 
+    showTimeline, 
+    setShowChart, 
+    setShowTimeline 
+  } = useConfigStore();
 
   const handleRecordsView = () => {
     setShowChart(false);

@@ -5,7 +5,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import enTranslation from './locales/en/translation.json';
 import zhCNTranslation from './locales/zh-CN/translation.json';
 
-// the translations
+// 翻译资源
 const resources = {
   en: {
     translation: enTranslation
@@ -15,17 +15,32 @@ const resources = {
   }
 };
 
+// 尝试从 localStorage 获取存储的语言
+let initialLanguage = 'zh-CN';
+try {
+  const storedConfig = localStorage.getItem('app-config');
+  if (storedConfig) {
+    const config = JSON.parse(storedConfig);
+    if (config.state && config.state.language) {
+      initialLanguage = config.state.language;
+    }
+  }
+} catch (e) {
+  console.error('获取存储的语言失败', e);
+}
+
 i18n
-  // detect user language
+  // 检测用户语言
   .use(LanguageDetector)
-  // pass the i18n instance to react-i18next
+  // 将 i18n 实例传递给 react-i18next
   .use(initReactI18next)
-  // init i18next
+  // 初始化 i18next
   .init({
     resources,
-    fallbackLng: 'en',
+    lng: initialLanguage,
+    fallbackLng: 'zh-CN',
     interpolation: {
-      escapeValue: false // react already safes from xss
+      escapeValue: false // react 已经防止 xss 攻击
     },
     detection: {
       order: ['localStorage', 'navigator'],

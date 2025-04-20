@@ -7,14 +7,14 @@ import { WorkRecord } from '../types/WorkRecord';
 
 interface WorkRecordFormProps {
   visible: boolean;
-  editingRecord: WorkRecord | null;
+  initialData: WorkRecord | null;
   onCancel: () => void;
   onSubmit: (record: WorkRecord) => void;
 }
 
 const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
   visible,
-  editingRecord,
+  initialData,
   onCancel,
   onSubmit,
 }) => {
@@ -24,13 +24,13 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
   // Set appropriate form values when editing a record
   useEffect(() => {
     if (visible) {
-      if (editingRecord) {
+      if (initialData) {
         form.setFieldsValue({
-          startDate: dayjs(editingRecord.startDate),
-          startTime: dayjs(editingRecord.startTime, 'HH:mm'),
-          endDate: dayjs(editingRecord.endDate),
-          endTime: dayjs(editingRecord.endTime, 'HH:mm'),
-          description: editingRecord.description,
+          startDate: dayjs(initialData.startDate),
+          startTime: dayjs(initialData.startTime, 'HH:mm'),
+          endDate: dayjs(initialData.endDate),
+          endTime: dayjs(initialData.endTime, 'HH:mm'),
+          description: initialData.description,
         });
       } else {
         form.resetFields();
@@ -40,7 +40,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
         });
       }
     }
-  }, [visible, editingRecord, form]);
+  }, [visible, initialData, form]);
 
   const handleSubmit = () => {
     form.validateFields().then((values) => {
@@ -60,7 +60,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
       }
       
       const newRecord: WorkRecord = {
-        id: editingRecord ? editingRecord.id : Date.now().toString(),
+        id: initialData ? initialData.id : Date.now().toString(),
         startDate,
         startTime,
         endDate,
@@ -78,7 +78,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
 
   return (
     <Modal
-      title={editingRecord ? t('editRecord') : t('addRecord')}
+      title={initialData ? t('editRecord') : t('addRecord')}
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -98,7 +98,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
             label={t('startTime')}
             rules={[{ required: true, message: t('pleaseSelectStartTime') }]}
           >
-            <TimePicker format="HH:mm" className="w-full" />
+            <TimePicker format="HH:mm" className="w-full" changeOnScroll needConfirm={false} />
           </Form.Item>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -114,7 +114,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
             label={t('endTime')}
             rules={[{ required: true, message: t('pleaseSelectEndTime') }]}
           >
-            <TimePicker format="HH:mm" className="w-full" />
+            <TimePicker format="HH:mm" className="w-full" changeOnScroll needConfirm={false} />
           </Form.Item>
         </div>
         <Form.Item
@@ -133,7 +133,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
             htmlType="submit"
             className="rounded-button"
           >
-            {editingRecord ? t('save') : t('add')}
+            {initialData ? t('save') : t('add')}
           </Button>
         </div>
       </Form>
