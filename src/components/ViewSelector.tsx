@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useConfigStore } from '../store/configStore';
+import { useConfigStore } from '@/store/configStore';
 
 const ViewSelector: React.FC = () => {
   const { t } = useTranslation();

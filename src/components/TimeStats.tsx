@@ -1,8 +1,8 @@
 import React, { memo } from 'react';
 import { Card, Row, Col, Typography, Divider, Segmented } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { TimeStats as TimeStatsType } from '../types';
-import { HOURS_PER_DAY } from '../utils/timeUtils';
+import { TimeStats as TimeStatsType } from '@/types';
+import { HOURS_PER_DAY } from '@/utils/timeUtils';
 
 const { Text } = Typography;
 

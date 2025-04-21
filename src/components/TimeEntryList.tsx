@@ -1,8 +1,8 @@
 import React, { useMemo, memo } from 'react';
 import { List, Typography, Card, Tooltip, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { TimeEntry } from '../types';
-import { HOURS_PER_DAY } from '../utils/timeUtils';
+import { TimeEntry } from '@/types';
+import { HOURS_PER_DAY } from '@/utils/timeUtils';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 
 const { Text, Paragraph } = Typography;

@@ -11,8 +11,8 @@ import WorkChart from './WorkChart';
 import TimelineView from './TimelineView';
 import RecordsView from './RecordsView';
 import WorkRecordForm from './WorkRecordForm';
-import { WorkRecord } from '../types/WorkRecord';
-import { useConfigStore } from '../store/configStore';
+import { WorkRecord } from '@/types/WorkRecord';
+import { useConfigStore } from '@/store/configStore';
 
 dayjs.extend(isBetween);
 

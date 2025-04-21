@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect } from 'react';
 import { Segmented, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { GlobalOutlined } from '@ant-design/icons';
-import { useConfigStore } from '../store/configStore';
+import { useConfigStore } from '@/store/configStore';
 
 // 使用memo包装组件以减少不必要的重渲染
 const LanguageSwitcher: React.FC = memo(() => {

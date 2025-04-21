@@ -3,7 +3,7 @@ import { Segmented } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
-// Match the minimum width used in WorkTimer
+// 匹配WorkTimer中使用的最小宽度
 const MIN_WIDTH = '320px';
 
 const Header: React.FC = () => {

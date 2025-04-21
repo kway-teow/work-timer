@@ -8,8 +8,8 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { WorkRecord } from '../types/WorkRecord';
-import { useConfigStore } from '../store/configStore';
+import { WorkRecord } from '@/types/WorkRecord';
+import { useConfigStore } from '@/store/configStore';
 
 interface TimelineViewProps {
   records: WorkRecord[];

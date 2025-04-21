@@ -6,8 +6,8 @@ import TimeEntryForm from './TimeEntryForm';
 import TimeEntryList from './TimeEntryList';
 import TimeStats from './TimeStats';
 import LanguageSwitcher from './LanguageSwitcher';
-import { TimeEntry, TimeStats as TimeStatsType } from '../types';
-import { getStartOfWeek, getStartOfMonth, calculateStats } from '../utils/timeUtils';
+import { TimeEntry, TimeStats as TimeStatsType } from '@/types';
+import { getStartOfWeek, getStartOfMonth, calculateStats } from '@/utils/timeUtils';
 
 const { Content } = Layout;
 const { Title } = Typography;
@@ -30,7 +30,7 @@ const TimeTracker: React.FC = () => {
   const [showAsDays, setShowAsDays] = useState(false);
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
 
-  // Load entries from localStorage on component mount
+  // 组件挂载时从localStorage加载数据
   useEffect(() => {
     const savedEntries = localStorage.getItem('timeEntries');
     if (savedEntries) {
@@ -42,13 +42,13 @@ const TimeTracker: React.FC = () => {
     }
   }, []);
 
-  // Update stats whenever entries change
+  // 当条目变化时更新统计数据
   useEffect(() => {
     if (entries.length > 0) {
-      // Save to localStorage
+      // 保存到localStorage
       localStorage.setItem('timeEntries', JSON.stringify(entries));
       
-      // Calculate stats
+      // 计算统计数据
       setWeeklyStats(calculateStats(entries, getStartOfWeek()));
       setMonthlyStats(calculateStats(entries, getStartOfMonth()));
     }
@@ -56,13 +56,13 @@ const TimeTracker: React.FC = () => {
 
   const handleAddEntry = (entry: TimeEntry) => {
     if (editingEntry) {
-      // Update existing entry
+      // 更新已有条目
       setEntries(prevEntries => 
         prevEntries.map(e => e.id === entry.id ? entry : e)
       );
       message.success(t('form.editSuccess'));
     } else {
-      // Add new entry
+      // 添加新条目
       setEntries(prevEntries => [entry, ...prevEntries]);
       message.success(t('form.success'));
     }

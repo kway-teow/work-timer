@@ -1,41 +1,41 @@
-import { TimeEntry, TimeStats } from '../types';
+import { TimeEntry, TimeStats } from '@/types';
 
 export const HOURS_PER_DAY = 7;
 
-// Calculate duration between two times in minutes
+// 计算两个时间之间的分钟数
 export const calculateDuration = (startTime: string, endTime: string): number => {
   const start = new Date(startTime);
   const end = new Date(endTime);
   
-  // Handle overnight - if end time is before start time, assume it's the next day
+  // 处理隔夜情况 - 如果结束时间早于开始时间，则假定为第二天
   let diff = end.getTime() - start.getTime();
   if (diff < 0) {
-    // Add 24 hours to the end time
+    // 给结束时间加上24小时
     const nextDayEnd = new Date(end);
     nextDayEnd.setDate(nextDayEnd.getDate() + 1);
     diff = nextDayEnd.getTime() - start.getTime();
   }
   
-  return Math.round(diff / (1000 * 60)); // Convert milliseconds to minutes
+  return Math.round(diff / (1000 * 60)); // 将毫秒转换为分钟
 };
 
-// Get start of current week (Monday)
+// 获取当前周的开始（周一）
 export const getStartOfWeek = (): Date => {
   const now = new Date();
-  const day = now.getDay(); // 0 is Sunday, 1 is Monday, etc.
-  const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Adjust for Sunday
+  const day = now.getDay(); // 0是周日，1是周一，以此类推
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1); // 针对周日进行调整
   const startOfWeek = new Date(now.setDate(diff));
   startOfWeek.setHours(0, 0, 0, 0);
   return startOfWeek;
 };
 
-// Get start of current month
+// 获取当前月份的开始
 export const getStartOfMonth = (): Date => {
   const now = new Date();
   return new Date(now.getFullYear(), now.getMonth(), 1);
 };
 
-// Calculate statistics for a given time period
+// 计算给定时间段的统计数据
 export const calculateStats = (entries: TimeEntry[], startDate: Date): TimeStats => {
   const filteredEntries = entries.filter(entry => 
     new Date(entry.startTime) >= startDate || new Date(entry.endTime!) >= startDate
@@ -52,7 +52,7 @@ export const calculateStats = (entries: TimeEntry[], startDate: Date): TimeStats
   };
 };
 
-// Format time string from Date object (HH:MM)
+// 从Date对象格式化时间字符串（HH:MM）
 export const formatTimeString = (date: Date): string => {
   return date.toLocaleTimeString('en-US', {
     hour: '2-digit',
@@ -61,7 +61,7 @@ export const formatTimeString = (date: Date): string => {
   });
 };
 
-// Parse time string (HH:MM) to Date
+// 将时间字符串（HH:MM）解析为Date对象
 export const parseTimeString = (timeString: string, baseDate: Date = new Date()): Date => {
   const [hours, minutes] = timeString.split(':').map(Number);
   const date = new Date(baseDate);

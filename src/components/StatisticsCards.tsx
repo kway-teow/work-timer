@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, Statistic, Switch, Select, DatePicker } from 'antd';
 import { ClockCircleOutlined, CalendarOutlined, GlobalOutlined, HistoryOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useConfigStore } from '../store/configStore';
+import { useConfigStore } from '@/store/configStore';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import locale from 'antd/es/date-picker/locale/zh_CN';

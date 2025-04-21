@@ -3,7 +3,7 @@ import * as echarts from 'echarts';
 import { Card, Radio } from 'antd';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { WorkRecord } from '../types/WorkRecord';
+import { WorkRecord } from '@/types/WorkRecord';
 
 interface WorkChartProps {
   records: WorkRecord[];
@@ -20,19 +20,19 @@ const WorkChart: React.FC<WorkChartProps> = ({ records }) => {
 
   useEffect(() => {
     if (chartRef.current) {
-      // Initialize the ECharts instance
+      // 初始化ECharts实例
       const chart = echarts.init(chartRef.current);
       
       let chartData;
       let xAxisData;
       
       if (chartType === 'daily') {
-        // Get the last 7 days
+        // 获取最近7天
         xAxisData = Array.from({ length: 7 }, (_, i) => {
           return dayjs().subtract(i, 'day').format('MM-DD');
         }).reverse();
         
-        // Calculate hours for each day
+        // 计算每天的工时
         chartData = xAxisData.map((date) => {
           return records.reduce((total, record) => {
             if (dayjs(record.startDate).format('MM-DD') === date) {
@@ -42,13 +42,13 @@ const WorkChart: React.FC<WorkChartProps> = ({ records }) => {
           }, 0);
         });
       } else if (chartType === 'weekly') {
-        // Get the last 4 weeks
+        // 获取最近4周
         xAxisData = Array.from({ length: 4 }, (_, i) => {
           const weekStart = dayjs().subtract(i, 'week').startOf('week');
           return `${weekStart.format('MM-DD')}`;
         }).reverse();
         
-        // Calculate hours for each week
+        // 计算每周的工时
         chartData = xAxisData.map((_weekStart, index) => {
           const startDate = dayjs().subtract(3 - index, 'week').startOf('week');
           const endDate = startDate.endOf('week');
@@ -62,12 +62,12 @@ const WorkChart: React.FC<WorkChartProps> = ({ records }) => {
           }, 0);
         });
       } else {
-        // Get the last 6 months
+        // 获取最近6个月
         xAxisData = Array.from({ length: 6 }, (_, i) => {
           return dayjs().subtract(i, 'month').format('YYYY-MM');
         }).reverse();
         
-        // Calculate hours for each month
+        // 计算每月的工时
         chartData = xAxisData.map((month) => {
           const [year, monthNum] = month.split('-');
           const startDate = dayjs(`${year}-${monthNum}-01`).startOf('month');
@@ -215,7 +215,7 @@ const WorkChart: React.FC<WorkChartProps> = ({ records }) => {
       
       chart.setOption(option);
       
-      // Handle window resizing
+      // 处理窗口大小调整
       const handleResize = () => {
         chart.resize();
       };

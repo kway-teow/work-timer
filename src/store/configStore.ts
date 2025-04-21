@@ -1,19 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// Define the type for our configuration store
+// 定义配置存储的类型
 interface ConfigState {
-  // Language config
+  // 语言配置
   language: string;
   setLanguage: (language: string) => void;
   
-  // View config
+  // 视图配置
   showChart: boolean;
   showTimeline: boolean;
   setShowChart: (show: boolean) => void;
   setShowTimeline: (show: boolean) => void;
   
-  // Display preferences
+  // 显示偏好
   showInDays: boolean;
   hoursPerDay: number;
   showTotalStats: boolean;
@@ -22,29 +22,29 @@ interface ConfigState {
   setShowTotalStats: (show: boolean) => void;
 }
 
-// Create the store with persist middleware
+// 使用持久化中间件创建存储
 export const useConfigStore = create<ConfigState>()(
   persist(
     (set, get) => ({
-      // Default language from browser or 'zh-CN'
+      // 默认语言从浏览器获取或设为'zh-CN'
       language: 'zh-CN',
       setLanguage: (language) => set({ language }),
       
-      // Default view config
+      // 默认视图配置
       showChart: false,
       showTimeline: false,
       setShowChart: (showChart) => set({ 
         showChart,
-        // Ensure only one view is active at a time
+        // 确保同时只有一个视图处于活动状态
         showTimeline: showChart ? false : get().showTimeline
       }),
       setShowTimeline: (showTimeline) => set({ 
         showTimeline,
-        // Ensure only one view is active at a time
+        // 确保同时只有一个视图处于活动状态
         showChart: showTimeline ? false : get().showChart
       }),
       
-      // Default display preferences
+      // 默认显示偏好
       showInDays: false,
       hoursPerDay: 7,
       showTotalStats: true,
@@ -53,7 +53,7 @@ export const useConfigStore = create<ConfigState>()(
       setShowTotalStats: (showTotalStats) => set({ showTotalStats })
     }),
     {
-      name: 'app-config', // name of the item in localStorage
+      name: 'app-config', // localStorage中的项目名称
     }
   )
 ); 

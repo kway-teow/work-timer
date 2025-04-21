@@ -1,13 +1,13 @@
 export interface TimeEntry {
   id: string;
-  startTime: string; // ISO string
-  endTime: string | null; // ISO string
+  startTime: string; // ISO 字符串
+  endTime: string | null; // ISO 字符串
   description: string;
-  duration: number; // Duration in minutes
+  duration: number; // 持续时间（分钟）
 }
 
 export interface TimeStats {
   totalHours: number;
-  totalDays: number; // Based on 7 hours per day
+  totalDays: number; // 基于每天7小时计算
   entries: TimeEntry[];
 } 

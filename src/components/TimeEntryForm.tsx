@@ -3,8 +3,8 @@ import { Form, Input, Button, TimePicker } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import { TimeEntry } from '../types';
-import { calculateDuration } from '../utils/timeUtils';
+import { TimeEntry } from '@/types';
+import { calculateDuration } from '@/utils/timeUtils';
 
 const { TextArea } = Input;
 
@@ -30,7 +30,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = memo(({ onSubmit, initialVal
     return i18n.language === 'zh-CN' ? 'HH:mm' : 'h:mm A';
   }, [i18n.language]);
 
-  // Set form values when initialValues changes
+  // 当initialValues变化时设置表单值
   useEffect(() => {
     if (initialValues) {
       const startTime = dayjs(initialValues.startTime);
@@ -58,7 +58,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = memo(({ onSubmit, initialVal
 
   // 使用useCallback优化表单提交函数
   const handleSubmit = useCallback((values: FormValues) => {
-    // Create date objects with current date but with hours and minutes from the selected times
+    // 创建日期对象，使用当前日期但采用所选时间的小时和分钟
     const startTime = new Date(startDate);
     startTime.setHours(values.startTime.hour());
     startTime.setMinutes(values.startTime.minute());
@@ -69,7 +69,7 @@ const TimeEntryForm: React.FC<TimeEntryFormProps> = memo(({ onSubmit, initialVal
     endTime.setMinutes(values.endTime.minute());
     endTime.setSeconds(0);
     
-    // If end time is earlier than start time, assume it's the next day
+    // 如果结束时间早于开始时间，则假定为第二天
     if (endTime < startTime) {
       endTime.setDate(endTime.getDate() + 1);
     }

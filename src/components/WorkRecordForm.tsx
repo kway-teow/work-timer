@@ -3,7 +3,7 @@ import { Modal, Form, DatePicker, TimePicker, Input, Button, message } from 'ant
 import dayjs from 'dayjs';
 import locale from 'antd/es/date-picker/locale/zh_CN';
 import { useTranslation } from 'react-i18next';
-import { WorkRecord } from '../types/WorkRecord';
+import { WorkRecord } from '@/types/WorkRecord';
 
 interface WorkRecordFormProps {
   visible: boolean;
@@ -21,7 +21,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
   const [form] = Form.useForm();
   const { t, i18n } = useTranslation();
   
-  // Set appropriate form values when editing a record
+  // 编辑记录时设置适当的表单值
   useEffect(() => {
     if (visible) {
       if (initialData) {
@@ -49,7 +49,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
       const endDate = values.endDate.format('YYYY-MM-DD');
       const endTime = values.endTime.format('HH:mm');
       
-      // Calculate working hours
+      // 计算工作时间
       const start = dayjs(`${startDate} ${startTime}`);
       const end = dayjs(`${endDate} ${endTime}`);
       const hours = end.diff(start, 'minute') / 60;
@@ -73,7 +73,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
     });
   };
 
-  // Choose the right locale for the DatePicker
+  // 为DatePicker选择正确的区域设置
   const datePickerLocale = i18n.language === 'zh-CN' ? locale : undefined;
 
   return (
