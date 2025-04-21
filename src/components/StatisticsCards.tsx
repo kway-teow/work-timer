@@ -5,8 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { useConfigStore } from '@/store/configStore';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
-import locale from 'antd/es/date-picker/locale/zh_CN';
-import enLocale from 'antd/es/date-picker/locale/en_US';
 
 interface StatisticsCardsProps {
   weeklyHours: number;
@@ -24,7 +22,7 @@ const StatisticsCards: React.FC<StatisticsCardsProps> = ({
   totalHours,
   records,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { Option } = Select;
   
   // 从存储中获取显示偏好
@@ -70,7 +68,6 @@ const StatisticsCards: React.FC<StatisticsCardsProps> = ({
   };
 
   // 选择DatePicker的正确语言
-  const datePickerLocale = i18n.language === 'zh-CN' ? locale : enLocale;
 
   return (
     <>
@@ -93,16 +90,16 @@ const StatisticsCards: React.FC<StatisticsCardsProps> = ({
             <Card className="shadow-sm rounded-lg hover:shadow-md transition-shadow" hoverable>
               <div className="flex items-center mb-2">
                 <HistoryOutlined className="text-orange-500 mr-2" />
-                <span className="text-gray-600">{t('selectedMonthHours')}</span>
                 <DatePicker 
                   picker="month"
-                  locale={datePickerLocale}
                   value={selectedDate}
                   onChange={handleDateChange}
                   allowClear={false}
-                  className="ml-2"
+                  className="cursor-pointer"
                   size="small"
                   format="YYYY年MM月"
+                  variant="borderless"
+                  suffixIcon={null}
                 />
               </div>
               <Statistic

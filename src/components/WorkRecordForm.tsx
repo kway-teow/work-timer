@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, DatePicker, TimePicker, Input, Button, message } from 'antd';
 import dayjs from 'dayjs';
-import locale from 'antd/es/date-picker/locale/zh_CN';
 import { useTranslation } from 'react-i18next';
 import { WorkRecord } from '@/types/WorkRecord';
 
@@ -19,7 +18,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
   onSubmit,
 }) => {
   const [form] = Form.useForm();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   
   // 编辑记录时设置适当的表单值
   useEffect(() => {
@@ -74,7 +73,6 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
   };
 
   // 为DatePicker选择正确的区域设置
-  const datePickerLocale = i18n.language === 'zh-CN' ? locale : undefined;
 
   return (
     <Modal
@@ -91,7 +89,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
             label={t('startDate')}
             rules={[{ required: true, message: t('pleaseSelectStartDate') }]}
           >
-            <DatePicker locale={datePickerLocale} className="w-full" />
+            <DatePicker className="w-full" />
           </Form.Item>
           <Form.Item
             name="startTime"
@@ -107,7 +105,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
             label={t('endDate')}
             rules={[{ required: true, message: t('pleaseSelectEndDate') }]}
           >
-            <DatePicker locale={datePickerLocale} className="w-full" />
+            <DatePicker className="w-full" />
           </Form.Item>
           <Form.Item
             name="endTime"
