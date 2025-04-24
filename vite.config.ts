@@ -5,7 +5,6 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/ 配置参考
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/work-timer/',
   resolve: {
     alias: {
       '@': '/src',
