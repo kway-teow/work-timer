@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, message } from 'antd';
+import { Modal, message, Skeleton, Card, Space } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
@@ -155,9 +155,41 @@ const WorkTimer: React.FC = () => {
     });
   };
 
-  // 如果正在加载，可以显示加载状态
+  // 如果正在加载，显示骨架屏
   if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen">加载中...</div>;
+    return (
+      <div className="min-h-screen bg-gray-50" style={{ minWidth: MIN_WIDTH }}>
+        {/* 页头骨架 */}
+        <div className="h-16 border-b border-gray-200 px-4 flex items-center justify-between">
+          <Skeleton.Button active style={{ width: 120 }} />
+          <Space>
+            <Skeleton.Avatar active size="small" />
+            <Skeleton.Button active style={{ width: 80 }} />
+          </Space>
+        </div>
+        
+        {/* 统计卡片骨架 */}
+        <div className="pt-16 px-4 pb-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {[...Array(3)].map((_, index) => (
+              <Card key={index} className="shadow-sm">
+                <Skeleton active paragraph={{ rows: 1 }} />
+              </Card>
+            ))}
+          </div>
+          
+          {/* 视图选择器骨架 */}
+          <div className="mb-4 flex justify-end">
+            <Skeleton.Button active style={{ width: 200 }} />
+          </div>
+          
+          {/* 内容区域骨架 */}
+          <Card>
+            <Skeleton active paragraph={{ rows: 8 }} />
+          </Card>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -208,10 +240,11 @@ const WorkTimer: React.FC = () => {
       {/* 表单对话框 */}
       {isModalVisible && (
         <WorkRecordForm
-          visible={isModalVisible}
-          onCancel={handleCancel}
+          open={isModalVisible}
+          onClose={handleCancel}
           onSubmit={handleSubmit}
-          initialData={editingRecord}
+          initialValues={editingRecord || undefined}
+          isEdit={editingRecord !== null && !isCopying}
         />
       )}
     </div>

@@ -1,51 +1,72 @@
 import React, { useEffect } from 'react';
-import { Modal, Form, DatePicker, TimePicker, Input, Button, message } from 'antd';
-import dayjs from 'dayjs';
+import { Modal, Form, DatePicker, TimePicker, Input, Button, message, Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
+import dayjs from 'dayjs';
 import { WorkRecord, NewWorkRecord } from '@/types/WorkRecord';
 
 interface WorkRecordFormProps {
-  visible: boolean;
-  initialData: WorkRecord | null;
-  onCancel: () => void;
+  open: boolean;
+  onClose: () => void;
   onSubmit: (record: WorkRecord | NewWorkRecord) => void;
+  initialValues?: WorkRecord;
+  isEdit?: boolean;
+  loading?: boolean;
 }
 
 const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
-  visible,
-  initialData,
-  onCancel,
+  open,
+  onClose,
   onSubmit,
+  initialValues,
+  isEdit = false,
+  loading = false,
 }) => {
-  const [form] = Form.useForm();
   const { t } = useTranslation();
+  const [form] = Form.useForm();
   
-  // 编辑记录时设置适当的表单值
   useEffect(() => {
-    if (visible) {
-      if (initialData) {
-        form.setFieldsValue({
-          startDate: dayjs(initialData.startDate),
-          startTime: dayjs(initialData.startTime, 'HH:mm'),
-          endDate: dayjs(initialData.endDate),
-          endTime: dayjs(initialData.endTime, 'HH:mm'),
-          description: initialData.description,
-        });
-      } else {
-        form.resetFields();
-        form.setFieldsValue({
-          startDate: dayjs(),
-          endDate: dayjs(),
-        });
-      }
+    if (initialValues && open) {
+      form.setFieldsValue({
+        date: dayjs(initialValues.startDate),
+        startTime: dayjs(`${initialValues.startDate} ${initialValues.startTime}`),
+        endTime: dayjs(`${initialValues.endDate} ${initialValues.endTime}`),
+        description: initialValues.description,
+      });
+    } else if (open) {
+      form.resetFields();
+      // 默认设置今天的日期
+      form.setFieldsValue({
+        date: dayjs(),
+      });
     }
-  }, [visible, initialData, form]);
+  }, [initialValues, open, form]);
+
+  // 骨架屏组件
+  if (loading) {
+    return (
+      <Modal
+        title={isEdit ? t('editRecord') : t('addRecord')}
+        open={open}
+        onCancel={onClose}
+        footer={null}
+        destroyOnClose
+      >
+        <div className="p-4">
+          <Skeleton active paragraph={{ rows: 4 }} />
+          <div className="flex justify-end mt-6">
+            <Skeleton.Button active className="mr-2" />
+            <Skeleton.Button active />
+          </div>
+        </div>
+      </Modal>
+    );
+  }
 
   const handleSubmit = () => {
     form.validateFields().then((values) => {
-      const startDate = values.startDate.format('YYYY-MM-DD');
+      const startDate = values.date.format('YYYY-MM-DD');
       const startTime = values.startTime.format('HH:mm');
-      const endDate = values.endDate.format('YYYY-MM-DD');
+      const endDate = values.date.format('YYYY-MM-DD');
       const endTime = values.endTime.format('HH:mm');
       
       // 计算工作时间
@@ -69,10 +90,10 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
       };
       
       // 如果是编辑现有记录，添加 id
-      if (initialData) {
+      if (initialValues) {
         const existingRecord: WorkRecord = {
           ...recordData,
-          id: initialData.id
+          id: initialValues.id
         };
         onSubmit(existingRecord);
       } else {
@@ -82,47 +103,50 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
     });
   };
 
-  // 为DatePicker选择正确的区域设置
-
   return (
     <Modal
-      title={initialData ? t('editRecord') : t('addRecord')}
-      open={visible}
-      onCancel={onCancel}
+      title={isEdit ? t('editRecord') : t('addRecord')}
+      open={open}
+      onCancel={onClose}
       footer={null}
       destroyOnClose
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 mb-3">
           <Form.Item
-            name="startDate"
-            label={t('startDate')}
-            rules={[{ required: true, message: t('pleaseSelectStartDate') }]}
+            name="date"
+            label={t('date')}
+            rules={[{ required: true, message: t('pleaseSelectDate') }]}
           >
             <DatePicker className="w-full" />
           </Form.Item>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
           <Form.Item
             name="startTime"
             label={t('startTime')}
             rules={[{ required: true, message: t('pleaseSelectStartTime') }]}
           >
-            <TimePicker format="HH:mm" className="w-full" changeOnScroll needConfirm={false} />
-          </Form.Item>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Form.Item
-            name="endDate"
-            label={t('endDate')}
-            rules={[{ required: true, message: t('pleaseSelectEndDate') }]}
-          >
-            <DatePicker className="w-full" />
+            <TimePicker 
+              format="HH:mm" 
+              className="w-full" 
+              changeOnScroll 
+              needConfirm={false} 
+              minuteStep={5}
+            />
           </Form.Item>
           <Form.Item
             name="endTime"
             label={t('endTime')}
             rules={[{ required: true, message: t('pleaseSelectEndTime') }]}
           >
-            <TimePicker format="HH:mm" className="w-full" changeOnScroll needConfirm={false} />
+            <TimePicker 
+              format="HH:mm" 
+              className="w-full" 
+              changeOnScroll 
+              needConfirm={false} 
+              minuteStep={5}
+            />
           </Form.Item>
         </div>
         <Form.Item
@@ -133,7 +157,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
           <Input.TextArea rows={4} placeholder={t('workContentPlaceholder')} />
         </Form.Item>
         <div className="flex justify-end gap-2 mt-4">
-          <Button onClick={onCancel} className="rounded-button">
+          <Button onClick={onClose} className="rounded-button">
             {t('cancel')}
           </Button>
           <Button
@@ -141,7 +165,7 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
             htmlType="submit"
             className="rounded-button"
           >
-            {initialData ? t('save') : t('add')}
+            {isEdit ? t('save') : t('add')}
           </Button>
         </div>
       </Form>

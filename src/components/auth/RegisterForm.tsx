@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, message, Card, Typography, Result } from 'antd';
+import { Form, Input, Button, message, Card, Typography, Result, Skeleton, Space } from 'antd';
 import { LockOutlined, MailOutlined, SendOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
@@ -58,6 +58,24 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm }) => {
 
   // 显示确认邮箱的提示信息
   if (showConfirmationMessage) {
+    // 重发邮件时的加载状态显示骨架屏
+    if (resendLoading) {
+      return (
+        <Card className="max-w-md w-full shadow-md">
+          <Space direction="vertical" align="center" style={{ width: '100%' }}>
+            <Skeleton.Image active />
+            <Skeleton.Input active style={{ width: 200 }} />
+            <Skeleton.Input active style={{ width: 280 }} />
+            <Space className="mt-4">
+              <Skeleton.Button active />
+              <Skeleton.Button active />
+            </Space>
+            <Skeleton.Input active style={{ width: 250 }} />
+          </Space>
+        </Card>
+      );
+    }
+
     return (
       <Card className="max-w-md w-full shadow-md">
         <Result
@@ -87,6 +105,31 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm }) => {
             <Paragraph>{t('checkSpamFolder')}</Paragraph>
           </div>
         </Result>
+      </Card>
+    );
+  }
+
+  // 在表单加载状态下显示骨架屏
+  if (isLoading) {
+    return (
+      <Card className="max-w-md w-full shadow-md">
+        <div className="text-center mb-6">
+          <Skeleton.Input active style={{ width: 150 }} />
+          <div className="mt-2">
+            <Skeleton.Input active style={{ width: 250 }} />
+          </div>
+        </div>
+
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <Skeleton.Input active block style={{ height: 40 }} />
+          <Skeleton.Input active block style={{ height: 40 }} />
+          <Skeleton.Input active block style={{ height: 40 }} />
+          <Skeleton.Button active block style={{ height: 40 }} />
+          
+          <div className="text-center mt-4">
+            <Skeleton.Input active style={{ width: 180 }} />
+          </div>
+        </Space>
       </Card>
     );
   }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Statistic, Switch, Select, DatePicker } from 'antd';
+import { Card, Statistic, Switch, Select, DatePicker, Skeleton } from 'antd';
 import { ClockCircleOutlined, CalendarOutlined, GlobalOutlined, HistoryOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useConfigStore } from '@/store/configStore';
@@ -14,6 +14,7 @@ interface StatisticsCardsProps {
     startDate: string;
     hours: number;
   }>;
+  loading?: boolean;
 }
 
 const StatisticsCards: React.FC<StatisticsCardsProps> = ({
@@ -21,6 +22,7 @@ const StatisticsCards: React.FC<StatisticsCardsProps> = ({
   monthlyHours,
   totalHours,
   records,
+  loading = false,
 }) => {
   const { t } = useTranslation();
   const { Option } = Select;
@@ -66,6 +68,27 @@ const StatisticsCards: React.FC<StatisticsCardsProps> = ({
       setSelectedDate(date);
     }
   };
+
+  // 骨架屏组件
+  if (loading) {
+    return (
+      <>
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Card className="shadow-sm rounded-lg">
+            <Skeleton active paragraph={{ rows: 1 }} />
+          </Card>
+          <Card className="shadow-sm rounded-lg">
+            <Skeleton active paragraph={{ rows: 1 }} />
+          </Card>
+        </div>
+        <div className="mt-4 flex justify-end">
+          <Skeleton.Button active size="small" className="mr-2" />
+          <Skeleton.Button active size="small" className="mr-2" />
+          <Skeleton.Button active size="small" />
+        </div>
+      </>
+    );
+  }
 
   // 选择DatePicker的正确语言
 

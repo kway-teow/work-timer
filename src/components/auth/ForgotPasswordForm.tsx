@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Form, Input, Button, message, Card, Typography } from 'antd';
+import { Form, Input, Button, message, Card, Typography, Skeleton, Space } from 'antd';
 import { MailOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
@@ -32,6 +32,29 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
       form.resetFields();
     }
   };
+
+  // 加载状态下显示骨架屏
+  if (isLoading) {
+    return (
+      <Card className="max-w-md w-full shadow-md">
+        <div className="text-center mb-6">
+          <Skeleton.Input active style={{ width: 180 }} />
+          <div className="mt-2">
+            <Skeleton.Input active style={{ width: 250 }} />
+          </div>
+        </div>
+
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <Skeleton.Input active block style={{ height: 40 }} />
+          <Skeleton.Button active block style={{ height: 40 }} />
+          
+          <div className="text-center mt-4">
+            <Skeleton.Input active style={{ width: 120 }} />
+          </div>
+        </Space>
+      </Card>
+    );
+  }
 
   return (
     <Card className="max-w-md w-full shadow-md">

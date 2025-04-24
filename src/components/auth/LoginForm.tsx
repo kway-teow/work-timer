@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Form, Input, Button, Card, Typography, message } from 'antd';
+import { Form, Input, Button, Card, Typography, message, Skeleton, Space } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
@@ -32,6 +32,31 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
       message.success(t('loginSuccess'));
     }
   };
+
+  // 加载状态下显示骨架屏
+  if (isLoading) {
+    return (
+      <Card className="max-w-md w-full shadow-md">
+        <div className="text-center mb-6">
+          <Skeleton.Input active style={{ width: 150 }} />
+          <div className="mt-2">
+            <Skeleton.Input active style={{ width: 250 }} />
+          </div>
+        </div>
+
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <Skeleton.Input active block style={{ height: 40 }} />
+          <Skeleton.Input active block style={{ height: 40 }} />
+          <Skeleton.Button active block style={{ height: 40 }} />
+          
+          <div className="flex justify-between mt-4">
+            <Skeleton.Input active style={{ width: 100 }} />
+            <Skeleton.Input active style={{ width: 100 }} />
+          </div>
+        </Space>
+      </Card>
+    );
+  }
 
   return (
     <Card className="max-w-md w-full shadow-md">
