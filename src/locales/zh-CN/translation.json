@@ -54,6 +54,17 @@
   "recordDeleted": "工时记录已删除",
   "endTimeError": "结束时间不能早于开始时间",
 
+  "sync": "同步数据",
+  "syncing": "同步中...",
+  "syncTooltip": "将本地数据同步到服务器",
+  "syncConfirmTitle": "确认同步",
+  "syncConfirmDescription": "将本地数据同步到服务器？这将上传所有本地保存的工时记录。",
+  "syncConfirmOk": "同步",
+  "date": "日期",
+  "timeRange": "时间范围",
+  "pleaseSelectDate": "请选择日期",
+  "pleaseSelectTimeRange": "请选择时间范围",
+
   "login": "登录",
   "register": "注册",
   "email": "邮箱",

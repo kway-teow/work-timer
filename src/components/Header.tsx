@@ -3,6 +3,7 @@ import { Segmented, Divider } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import UserStatus from './auth/UserStatus';
+import SyncButton from './SyncButton';
 import { useAuthStore } from '@/store/authStore';
 
 // 匹配WorkTimer中使用的最小宽度
@@ -29,6 +30,8 @@ const Header: React.FC = () => {
       <div className="flex items-center">
         {user && (
           <>
+            <SyncButton />
+            <Divider type="vertical" className="mx-3 h-5" />
             <UserStatus />
             <Divider type="vertical" className="mx-3 h-5" />
           </>
