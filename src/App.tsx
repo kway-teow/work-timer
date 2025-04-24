@@ -9,6 +9,7 @@ import WorkTimer from './components/WorkTimer';
 import { useConfigStore } from './store/configStore';
 import { useAuthStore } from './store/authStore';
 import AuthCallback from './components/auth/AuthCallback';
+import AuthGuard from './components/auth/AuthGuard';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // 创建 TanStack Query 客户端
@@ -70,7 +71,7 @@ const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <ConfigProvider locale={antdLocale}>
         <AntdApp>
-          {isAuthCallback ? <AuthCallback /> : <WorkTimer />}
+          {isAuthCallback ? <AuthCallback /> : <AuthGuard><WorkTimer /></AuthGuard>}
         </AntdApp>
       </ConfigProvider>
     </QueryClientProvider>
