@@ -1,8 +1,9 @@
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback } from 'react';
 import { Segmented, message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { GlobalOutlined } from '@ant-design/icons';
 import { useConfigStore } from '@/store/configStore';
+import { useMount } from '@/hooks';
 
 // 使用memo包装组件以减少不必要的重渲染
 const LanguageSwitcher: React.FC = memo(() => {
@@ -10,11 +11,11 @@ const LanguageSwitcher: React.FC = memo(() => {
   const { language, setLanguage } = useConfigStore();
 
   // 组件挂载时，从store初始化i18n语言
-  useEffect(() => {
+  useMount(() => {
     if (language && language !== i18n.language) {
       i18n.changeLanguage(language);
     }
-  }, []);
+  });
 
   // 使用useCallback缓存changeLanguage函数
   const changeLanguage = useCallback((value: string | number) => {

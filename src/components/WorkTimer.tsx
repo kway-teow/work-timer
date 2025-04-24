@@ -13,7 +13,7 @@ import RecordsView from './RecordsView';
 import WorkRecordForm from './WorkRecordForm';
 import { WorkRecord, NewWorkRecord } from '@/types/WorkRecord';
 import { useConfigStore } from '@/store/configStore';
-import { useWorkRecords } from '@/hooks/useWorkRecords';
+import { useWorkRecords } from '@/hooks';
 
 dayjs.extend(isBetween);
 
