@@ -1,35 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { WorkRecord } from '@/types/WorkRecord';
-import { supabase, WORK_RECORDS_TABLE, isSupabaseConfigured, SupabaseRecord } from '@/utils/supabase';
+import { WorkRecord, NewWorkRecord } from '@/types/WorkRecord';
+import { supabase, WORK_RECORDS_TABLE, isSupabaseConfigured } from '@/utils/supabase';
+import { transformApiToLocal, transformLocalToApi } from '@/utils/dataTransform';
 
 // 工作记录的 localStorage 键名
 const STORAGE_KEY = 'workRecords';
 
-// 将本地记录转换为 Supabase 记录格式
-const toSupabaseRecord = (record: WorkRecord): Omit<SupabaseRecord, 'id' | 'user_id' | 'created_at' | 'updated_at'> => {
-  return {
-    start_date: record.startDate,
-    start_time: record.startTime,
-    end_date: record.endDate,
-    end_time: record.endTime,
-    description: record.description,
-    hours: record.hours
-  };
-};
-
-// 将 Supabase 记录转换为本地记录格式
-const toLocalRecord = (record: SupabaseRecord): WorkRecord => {
-  return {
-    id: record.id,
-    startDate: record.start_date,
-    startTime: record.start_time,
-    endDate: record.end_date,
-    endTime: record.end_time,
-    description: record.description,
-    hours: record.hours
-  };
-};
+// 排除的字段 - 这些字段不会在转换过程中被包含
+const EXCLUDED_API_FIELDS = ['created_at', 'updated_at'];
+const EXCLUDED_LOCAL_FIELDS = ['user_id'];
 
 interface WorkRecordState {
   // 工作记录数据
@@ -41,7 +21,7 @@ interface WorkRecordState {
   
   // 操作方法
   fetchRecords: () => Promise<void>;
-  addRecord: (record: WorkRecord) => Promise<void>;
+  addRecord: (record: NewWorkRecord) => Promise<void>;
   updateRecord: (record: WorkRecord) => Promise<void>;
   deleteRecord: (id: string) => Promise<void>;
 }
@@ -76,7 +56,12 @@ export const useWorkRecordStore = create<WorkRecordState>()(
               
               if (data) {
                 // 转换为本地格式
-                const localRecords = data.map(toLocalRecord);
+                const localRecords = data.map(record => {
+                  // 先转换为本地格式（将字段名从下划线改为驼峰）
+                  const localData = transformApiToLocal(record as Record<string, unknown>, EXCLUDED_API_FIELDS);
+                  // 转换为 WorkRecord 类型
+                  return localData as unknown as WorkRecord;
+                });
                 
                 // 更新状态
                 set({ records: localRecords, isLoading: false });
@@ -108,7 +93,7 @@ export const useWorkRecordStore = create<WorkRecordState>()(
       },
       
       // 添加记录
-      addRecord: async (record: WorkRecord) => {
+      addRecord: async (record: NewWorkRecord) => {
         try {
           // 如果可以使用 Supabase，则同步到数据库
           if (isSupabaseConfigured()) {
@@ -116,10 +101,13 @@ export const useWorkRecordStore = create<WorkRecordState>()(
             const { data: { session } } = await supabase.auth.getSession();
             
             if (session) {
-              // 转换为 Supabase 格式 - 让 Supabase 自动生成 id (UUID)
+              // 转换为 Supabase 格式
+              const convertedData = transformLocalToApi(record as unknown as Record<string, unknown>, EXCLUDED_LOCAL_FIELDS);
+              
+              // 添加用户ID
               const supabaseRecord = {
-                ...toSupabaseRecord(record),
-                user_id: session.user.id  // 只设置 user_id
+                ...convertedData,
+                user_id: session.user.id
               };
               
               // 先尝试向 Supabase 添加记录并获取返回的数据
@@ -134,7 +122,9 @@ export const useWorkRecordStore = create<WorkRecordState>()(
               
               // 使用 Supabase 返回的记录（包含自动生成的UUID）
               if (data && data.length > 0) {
-                const returnedRecord = toLocalRecord(data[0]);
+                // 转换为本地格式
+                const localData = transformApiToLocal(data[0] as Record<string, unknown>, EXCLUDED_API_FIELDS);
+                const returnedRecord = localData as unknown as WorkRecord;
                 
                 // 获取当前记录
                 const currentRecords = get().records;
@@ -150,7 +140,7 @@ export const useWorkRecordStore = create<WorkRecordState>()(
           }
           
           // 如果不能使用 Supabase 或用户未登录，使用本地 ID
-          const recordWithLocalId = {
+          const recordWithLocalId: WorkRecord = {
             ...record,
             id: Date.now().toString()
           };
@@ -190,9 +180,15 @@ export const useWorkRecordStore = create<WorkRecordState>()(
             const { data: { session } } = await supabase.auth.getSession();
             
             if (session) {
+              // 转换为 Supabase 格式，排除 id 字段(因为 id 直接用于 eq 条件)
+              const convertedData = transformLocalToApi(
+                record as unknown as Record<string, unknown>,
+                [...EXCLUDED_LOCAL_FIELDS, 'id']
+              );
+              
               const { error } = await supabase
                 .from(WORK_RECORDS_TABLE)
-                .update(toSupabaseRecord(record))
+                .update(convertedData)
                 .eq('id', record.id)
                 .eq('user_id', session.user.id);
                 

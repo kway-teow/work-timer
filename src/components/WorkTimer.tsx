@@ -11,7 +11,7 @@ import WorkChart from './WorkChart';
 import TimelineView from './TimelineView';
 import RecordsView from './RecordsView';
 import WorkRecordForm from './WorkRecordForm';
-import { WorkRecord } from '@/types/WorkRecord';
+import { WorkRecord, NewWorkRecord } from '@/types/WorkRecord';
 import { useConfigStore } from '@/store/configStore';
 import { useWorkRecords } from '@/hooks/useWorkRecords';
 
@@ -94,9 +94,21 @@ const WorkTimer: React.FC = () => {
         setIsCopying(false);
         setEditingRecord(record);
       } else {
-        // 复制的新记录
+        // 复制的新记录 - 创建一个没有 ID 的记录副本
         setIsCopying(true);
-        setEditingRecord(record);
+        
+        // 创建 NewWorkRecord 类型对象 (不含 ID)
+        const newRecordCopy: NewWorkRecord = {
+          startDate: record.startDate,
+          startTime: record.startTime,
+          endDate: record.endDate,
+          endTime: record.endTime,
+          description: record.description,
+          hours: record.hours
+        };
+        
+        // 使用类型断言临时转换来设置编辑记录
+        setEditingRecord(newRecordCopy as WorkRecord);
       }
     } else {
       // 添加新记录
@@ -114,14 +126,14 @@ const WorkTimer: React.FC = () => {
   };
 
   // 处理表单提交
-  const handleSubmit = async (record: WorkRecord) => {
+  const handleSubmit = async (record: WorkRecord | NewWorkRecord) => {
     if (editingRecord && !isCopying) {
       // 更新现有记录
-      updateRecordMutation(record);
+      updateRecordMutation(record as WorkRecord);
       message.success(t('recordUpdated'));
     } else {
       // 添加新记录或复制的记录
-      addRecordMutation(record);
+      addRecordMutation(record as NewWorkRecord);
       message.success(isCopying ? t('recordCopied') : t('recordAdded'));
     }
     setIsModalVisible(false);

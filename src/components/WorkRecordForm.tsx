@@ -2,13 +2,13 @@ import React, { useEffect } from 'react';
 import { Modal, Form, DatePicker, TimePicker, Input, Button, message } from 'antd';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { WorkRecord } from '@/types/WorkRecord';
+import { WorkRecord, NewWorkRecord } from '@/types/WorkRecord';
 
 interface WorkRecordFormProps {
   visible: boolean;
   initialData: WorkRecord | null;
   onCancel: () => void;
-  onSubmit: (record: WorkRecord) => void;
+  onSubmit: (record: WorkRecord | NewWorkRecord) => void;
 }
 
 const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
@@ -58,8 +58,8 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
         return;
       }
       
-      // 创建新记录对象
-      const newRecord: Partial<WorkRecord> = {
+      // 基础记录数据
+      const recordData: NewWorkRecord = {
         startDate,
         startTime,
         endDate,
@@ -68,12 +68,17 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
         hours: parseFloat(hours.toFixed(1)),
       };
       
-      // 如果是编辑现有记录，则保留原始 id
-      if (initialData?.id) {
-        newRecord.id = initialData.id;
+      // 如果是编辑现有记录，添加 id
+      if (initialData) {
+        const existingRecord: WorkRecord = {
+          ...recordData,
+          id: initialData.id
+        };
+        onSubmit(existingRecord);
+      } else {
+        // 创建新记录，不需要 id
+        onSubmit(recordData);
       }
-      
-      onSubmit(newRecord as WorkRecord);
     });
   };
 

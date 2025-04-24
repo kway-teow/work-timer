@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useWorkRecordStore } from '@/store/workRecordStore';
-import type { WorkRecord } from '@/types/WorkRecord';
+import type { WorkRecord, NewWorkRecord } from '@/types/WorkRecord';
 
 // 定义查询键
 const RECORDS_QUERY_KEY = ['workRecords'];
@@ -23,7 +23,7 @@ export const useWorkRecords = () => {
 
   // 添加记录突变
   const addRecordMutation = useMutation({
-    mutationFn: (record: WorkRecord) => addRecord(record),
+    mutationFn: (record: NewWorkRecord) => addRecord(record),
     onSuccess: () => {
       // 成功后使查询缓存失效，触发重新获取
       queryClient.invalidateQueries({ queryKey: RECORDS_QUERY_KEY });
