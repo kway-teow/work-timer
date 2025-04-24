@@ -204,7 +204,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   resetPassword: async (email: string) => {
     try {
       set({ isLoading: true, error: null });
-      
+      // TODO 改造为react-router-dom
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
       });

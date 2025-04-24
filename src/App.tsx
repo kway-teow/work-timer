@@ -10,6 +10,7 @@ import { useConfigStore } from './store/configStore';
 import { useAuthStore } from './store/authStore';
 import AuthCallback from './components/auth/AuthCallback';
 import AuthGuard from './components/auth/AuthGuard';
+import ResetPasswordPage from './components/auth/ResetPasswordPage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // 创建 TanStack Query 客户端
@@ -61,17 +62,29 @@ const App: React.FC = () => {
   // 获取当前URL路径
   const path = window.location.pathname;
   
-  // 判断是否是认证回调路径
+  // 判断路由
   const isAuthCallback = path.startsWith('/auth/callback');
+  const isResetPassword = path.startsWith('/reset-password');
   
   // 根据当前语言选择 antd 的语言包
   const antdLocale = language === 'zh-CN' ? zhCN : enUS;
+  
+  // 根据路由渲染对应组件
+  const renderRouteComponent = () => {
+    if (isAuthCallback) {
+      return <AuthCallback />;
+    } else if (isResetPassword) {
+      return <ResetPasswordPage />;
+    } else {
+      return <AuthGuard><WorkTimer /></AuthGuard>;
+    }
+  };
   
   return (
     <QueryClientProvider client={queryClient}>
       <ConfigProvider locale={antdLocale}>
         <AntdApp>
-          {isAuthCallback ? <AuthCallback /> : <AuthGuard><WorkTimer /></AuthGuard>}
+          {renderRouteComponent()}
         </AntdApp>
       </ConfigProvider>
     </QueryClientProvider>

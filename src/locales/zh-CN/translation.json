@@ -91,6 +91,12 @@
   "registerDescription": "创建新账号以使用工时管家",
   "forgotPasswordDescription": "输入您的邮箱以接收密码重置链接",
   "resetPasswordEmailSent": "密码重置链接已发送到您的邮箱",
+  "resetPassword": "重置密码",
+  "resetPasswordDescription": "请输入您的新密码",
+  "newPassword": "新密码",
+  "passwordMinLength": "密码长度至少为8个字符",
+  "passwordResetSuccess": "密码重置成功",
+  "redirectingToHome": "正在跳转到首页...",
   
   "registerSuccessTitle": "注册成功",
   "confirmEmailMessage": "请查看您的邮箱并点击确认链接来激活账号",

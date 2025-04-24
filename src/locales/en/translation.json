@@ -104,5 +104,11 @@
   "authenticationError": "Authentication Error",
   "emailConfirmed": "Email Confirmed",
   "emailConfirmedMessage": "Your email has been confirmed successfully, you can now login",
-  "backToHome": "Back to Home"
+  "backToHome": "Back to Home",
+  "resetPassword": "Reset Password",
+  "resetPasswordDescription": "Please enter your new password",
+  "newPassword": "New Password",
+  "passwordMinLength": "Password must be at least 8 characters",
+  "passwordResetSuccess": "Password has been reset successfully",
+  "redirectingToHome": "Redirecting to home page..."
 } 
