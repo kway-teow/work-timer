@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -13,14 +13,12 @@ import RecordsView from './RecordsView';
 import WorkRecordForm from './WorkRecordForm';
 import { WorkRecord } from '@/types/WorkRecord';
 import { useConfigStore } from '@/store/configStore';
+import { useWorkRecords } from '@/hooks/useWorkRecords';
 
 dayjs.extend(isBetween);
 
 // 全局最小宽度，用于一致的显示效果
 const MIN_WIDTH = '320px';
-
-// 工作记录的 localStorage 键名
-const STORAGE_KEY = 'workRecords';
 
 const WorkTimer: React.FC = () => {
   const { t } = useTranslation();
@@ -28,38 +26,26 @@ const WorkTimer: React.FC = () => {
   // 从 Zustand store 获取配置状态
   const { showChart, showTimeline } = useConfigStore();
   
-  // 初始化时直接从localStorage读取
-  const initialRecords = (() => {
-    try {
-      const savedRecords = localStorage.getItem(STORAGE_KEY);
-      return savedRecords ? JSON.parse(savedRecords) : [];
-    } catch (error) {
-      console.error('加载保存的记录时出错:', error);
-      return [];
-    }
-  })();
-
-  // 使用原始的useState，但不直接暴露setRecords
-  const [records, setRecordsState] = useState<WorkRecord[]>(initialRecords);
-  
-  // 创建一个包装过的setRecords函数，同时更新state和localStorage
-  const setRecords = useCallback((newRecords: WorkRecord[] | ((prev: WorkRecord[]) => WorkRecord[])) => {
-    // 处理函数参数情况
-    setRecordsState(prevRecords => {
-      const nextRecords = typeof newRecords === 'function' 
-        ? newRecords(prevRecords) 
-        : newRecords;
-      
-      // 保存到localStorage
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextRecords));
-      
-      return nextRecords;
-    });
-  }, []);
+  // 从 TanStack Query 获取工作记录状态
+  const { 
+    records, 
+    isLoading, 
+    error, 
+    addRecord: addRecordMutation, 
+    updateRecord: updateRecordMutation, 
+    deleteRecord: deleteRecordMutation 
+  } = useWorkRecords();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState<WorkRecord | null>(null);
   const [isCopying, setIsCopying] = useState(false); // 标记是否是复制操作
+
+  // 使用 useEffect 处理错误信息
+  useEffect(() => {
+    if (error) {
+      message.error(String(error));
+    }
+  }, [error]);
 
   // 计算每周工时
   const getWeeklyHours = () => {
@@ -128,16 +114,14 @@ const WorkTimer: React.FC = () => {
   };
 
   // 处理表单提交
-  const handleSubmit = (record: WorkRecord) => {
+  const handleSubmit = async (record: WorkRecord) => {
     if (editingRecord && !isCopying) {
       // 更新现有记录
-      setRecords(
-        records.map((r) => (r.id === editingRecord.id ? record : r))
-      );
+      updateRecordMutation(record);
       message.success(t('recordUpdated'));
     } else {
       // 添加新记录或复制的记录
-      setRecords([record, ...records]);
+      addRecordMutation(record);
       message.success(isCopying ? t('recordCopied') : t('recordAdded'));
     }
     setIsModalVisible(false);
@@ -146,18 +130,23 @@ const WorkTimer: React.FC = () => {
   };
 
   // 删除记录
-  const deleteRecord = (id: string) => {
+  const handleDelete = (id: string) => {
     Modal.confirm({
       title: t('confirmDelete'),
       content: t('confirmDeleteMessage'),
       okText: t('confirm'),
       cancelText: t('cancel'),
-      onOk: () => {
-        setRecords(records.filter((record) => record.id !== id));
+      onOk: async () => {
+        deleteRecordMutation(id);
         message.success(t('recordDeleted'));
       },
     });
   };
+
+  // 如果正在加载，可以显示加载状态
+  if (isLoading) {
+    return <div className="flex justify-center items-center min-h-screen">加载中...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50" style={{ minWidth: MIN_WIDTH }}>
@@ -184,13 +173,13 @@ const WorkTimer: React.FC = () => {
           <TimelineView
             records={records}
             onEdit={showModal}
-            onDelete={deleteRecord}
+            onDelete={handleDelete}
           />
         ) : (
           <RecordsView
             records={records}
             onEdit={showModal}
-            onDelete={deleteRecord}
+            onDelete={handleDelete}
           />
         )}
       </div>

@@ -1,13 +1,16 @@
 import React from 'react';
-import { Segmented } from 'antd';
+import { Segmented, Divider } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import UserStatus from './auth/UserStatus';
+import { useAuthStore } from '@/store/authStore';
 
 // 匹配WorkTimer中使用的最小宽度
 const MIN_WIDTH = '320px';
 
 const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const { user } = useAuthStore();
   const currentLanguage = i18n.language;
   
   const handleLanguageChange = (value: string | number) => {
@@ -24,22 +27,30 @@ const Header: React.FC = () => {
     >
       <h1 className="text-xl font-semibold text-gray-800">{t('appTitle')}</h1>
       <div className="flex items-center">
-        <GlobalOutlined className="mr-2 text-gray-600" />
-        <Segmented
-          value={currentLanguage === 'zh-CN' ? 'zh-CN' : 'en'}
-          onChange={handleLanguageChange}
-          options={[
-            {
-              label: '中文',
-              value: 'zh-CN',
-            },
-            {
-              label: 'EN',
-              value: 'en',
-            },
-          ]}
-          size="small"
-        />
+        {user && (
+          <>
+            <UserStatus />
+            <Divider type="vertical" className="mx-3 h-5" />
+          </>
+        )}
+        <div className="flex items-center">
+          <GlobalOutlined className="mr-2 text-gray-600" />
+          <Segmented
+            value={currentLanguage === 'zh-CN' ? 'zh-CN' : 'en'}
+            onChange={handleLanguageChange}
+            options={[
+              {
+                label: '中文',
+                value: 'zh-CN',
+              },
+              {
+                label: 'EN',
+                value: 'en',
+              },
+            ]}
+            size="small"
+          />
+        </div>
       </div>
     </div>
   );

@@ -58,8 +58,8 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
         return;
       }
       
-      const newRecord: WorkRecord = {
-        id: initialData ? initialData.id : Date.now().toString(),
+      // 创建新记录对象
+      const newRecord: Partial<WorkRecord> = {
         startDate,
         startTime,
         endDate,
@@ -68,7 +68,12 @@ const WorkRecordForm: React.FC<WorkRecordFormProps> = ({
         hours: parseFloat(hours.toFixed(1)),
       };
       
-      onSubmit(newRecord);
+      // 如果是编辑现有记录，则保留原始 id
+      if (initialData?.id) {
+        newRecord.id = initialData.id;
+      }
+      
+      onSubmit(newRecord as WorkRecord);
     });
   };
 

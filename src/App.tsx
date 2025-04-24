@@ -1,87 +1,80 @@
-import { ConfigProvider } from 'antd';
-import WorkTimer from './components/WorkTimer';
-import { useEffect, useMemo, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useConfigStore } from './store/configStore';
-
-// 导入 Ant Design 语言包
-import enUS from 'antd/locale/en_US';
-import zhCN from 'antd/locale/zh_CN';
-
-// 导入 dayjs 语言包
+import React, { useEffect } from 'react';
+import { ConfigProvider, App as AntdApp } from 'antd';
+import zhCN from 'antd/lib/locale/zh_CN';
+import enUS from 'antd/lib/locale/en_US';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import 'dayjs/locale/en';
+import { useTranslation } from 'react-i18next';
+import WorkTimer from './components/WorkTimer';
+import { useConfigStore } from './store/configStore';
+import { useAuthStore } from './store/authStore';
+import AuthCallback from './components/auth/AuthCallback';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// 缓存语言映射以避免重复创建
-const localeMap = {
-  'zh-CN': zhCN,
-  'en': enUS
-};
+// 创建 TanStack Query 客户端
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5分钟
+      gcTime: 1000 * 60 * 60, // 1小时
+      retry: 1,
+    },
+  },
+});
 
-function App() {
+const App: React.FC = () => {
   const { i18n } = useTranslation();
-  const { language, setLanguage } = useConfigStore();
+  const { language } = useConfigStore();
+  const { initialize } = useAuthStore();
   
-  // 基于当前语言使用记忆化的 Ant Design 语言包
-  const antdLocale = useMemo(() => {
-    return i18n.language === 'zh-CN' ? localeMap['zh-CN'] : localeMap['en'];
-  }, [i18n.language]);
-  
-  // 使用 useCallback 优化语言变更处理函数
-  const handleLanguageChanged = useCallback((lng: string) => {
-    // 设置 dayjs 语言
-    const dayjsLocale = lng === 'zh-CN' ? 'zh-cn' : 'en';
-    dayjs.locale(dayjsLocale);
-    
-    // 更新文档标题
-    document.title = lng === 'zh-CN' ? '工时管家' : 'Work Timer';
-    
-    // 与存储同步
-    if (lng !== language) {
-      setLanguage(lng);
-    }
-  }, [language, setLanguage]);
-  
-  // 监听语言变化
+  // 设置语言
   useEffect(() => {
-    // 初始化时执行一次
-    handleLanguageChanged(i18n.language);
+    // 根据当前语言设置 dayjs 的语言环境
+    if (language === 'zh-CN') {
+      dayjs.locale('zh-cn');
+    } else {
+      dayjs.locale('en');
+    }
     
-    // 添加语言变更事件监听器
-    i18n.on('languageChanged', handleLanguageChanged);
+    // 设置 i18n 的语言
+    i18n.changeLanguage(language);
+  }, [language, i18n]);
+  
+  // 初始化认证
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+  
+  // 设置视口元标签
+  useEffect(() => {
+    const metaViewport = document.createElement('meta');
+    metaViewport.name = 'viewport';
+    metaViewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    document.head.appendChild(metaViewport);
     
-    // 组件卸载时清理监听器
     return () => {
-      i18n.off('languageChanged', handleLanguageChanged);
+      document.head.removeChild(metaViewport);
     };
-  }, [i18n, handleLanguageChanged]);
-  
-  useEffect(() => {
-    // 添加视口元标签用于移动设备缩放
-    const meta = document.createElement('meta');
-    meta.name = 'viewport';
-    meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-    
-    // 仅在元标签不存在时添加
-    if (!document.querySelector('meta[name="viewport"]')) {
-      document.head.appendChild(meta);
-    }
   }, []);
 
-  // 记忆化主题配置
-  const theme = useMemo(() => ({ 
-    token: { colorPrimary: '#1890ff' } 
-  }), []);
-
+  // 获取当前URL路径
+  const path = window.location.pathname;
+  
+  // 判断是否是认证回调路径
+  const isAuthCallback = path.startsWith('/auth/callback');
+  
+  // 根据当前语言选择 antd 的语言包
+  const antdLocale = language === 'zh-CN' ? zhCN : enUS;
+  
   return (
-    <ConfigProvider 
-      theme={theme}
-      locale={antdLocale}
-    >
-      <WorkTimer />
-    </ConfigProvider>
+    <QueryClientProvider client={queryClient}>
+      <ConfigProvider locale={antdLocale}>
+        <AntdApp>
+          {isAuthCallback ? <AuthCallback /> : <WorkTimer />}
+        </AntdApp>
+      </ConfigProvider>
+    </QueryClientProvider>
   );
-}
+};
 
 export default App;

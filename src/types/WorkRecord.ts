@@ -1,5 +1,5 @@
 export interface WorkRecord {
-  id: string;
+  id?: string;
   startDate: string;
   startTime: string;
   endDate: string;
