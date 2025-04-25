@@ -5,12 +5,16 @@ import enUS from 'antd/lib/locale/en_US';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 import { useTranslation } from 'react-i18next';
+import { createBrowserRouter, RouterProvider } from 'react-router';
+import { ErrorBoundary } from 'react-error-boundary';
 import WorkTimer from './components/WorkTimer';
 import { useConfigStore } from './store/configStore';
 import { useAuthStore } from './store/authStore';
 import AuthCallback from './components/auth/AuthCallback';
 import AuthGuard from './components/auth/AuthGuard';
 import ResetPasswordPage from './components/auth/ResetPasswordPage';
+import NotFound from './components/NotFound';
+import ErrorFallback from './components/ErrorFallback';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // 创建 TanStack Query 客户端
@@ -23,6 +27,44 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// 全局错误日志
+const logError = (error: Error, info: React.ErrorInfo) => {
+  // 在这里可以将错误发送到日志服务
+  console.error('应用捕获到错误:', error);
+  console.error('组件堆栈:', info.componentStack);
+};
+
+// 验证 Email 回调页面的加载器
+const authCallbackLoader = ({ request }: { request: Request }) => {
+  const url = new URL(request.url);
+  const token = url.searchParams.get('token');
+  if (!token) {
+    return { error: 'Token is missing' };
+  }
+  return { token };
+};
+
+// 创建路由配置
+const router = createBrowserRouter([
+  {
+    path: '/auth/callback',
+    element: <AuthCallback />,
+    loader: authCallbackLoader
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />
+  },
+  {
+    path: '/',
+    element: <AuthGuard><WorkTimer /></AuthGuard>
+  },
+  {
+    path: '*',
+    element: <NotFound />
+  }
+]);
 
 const App: React.FC = () => {
   const { i18n } = useTranslation();
@@ -58,36 +100,20 @@ const App: React.FC = () => {
       document.head.removeChild(metaViewport);
     };
   }, []);
-
-  // 获取当前URL路径
-  const path = window.location.pathname;
-  
-  // 判断路由
-  const isAuthCallback = path.startsWith('/auth/callback');
-  const isResetPassword = path.startsWith('/reset-password');
   
   // 根据当前语言选择 antd 的语言包
   const antdLocale = language === 'zh-CN' ? zhCN : enUS;
   
-  // 根据路由渲染对应组件
-  const renderRouteComponent = () => {
-    if (isAuthCallback) {
-      return <AuthCallback />;
-    } else if (isResetPassword) {
-      return <ResetPasswordPage />;
-    } else {
-      return <AuthGuard><WorkTimer /></AuthGuard>;
-    }
-  };
-  
   return (
-    <QueryClientProvider client={queryClient}>
-      <ConfigProvider locale={antdLocale}>
-        <AntdApp>
-          {renderRouteComponent()}
-        </AntdApp>
-      </ConfigProvider>
-    </QueryClientProvider>
+    <ErrorBoundary FallbackComponent={ErrorFallback} onError={logError}>
+      <QueryClientProvider client={queryClient}>
+        <ConfigProvider locale={antdLocale}>
+          <AntdApp>
+            <RouterProvider router={router} />
+          </AntdApp>
+        </ConfigProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

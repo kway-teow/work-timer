@@ -9,9 +9,10 @@ const { Title, Text, Link } = Typography;
 interface LoginFormProps {
   onToggleForm: () => void;
   onForgotPassword: () => void;
+  onSuccess?: () => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword, onSuccess }) => {
   const { t } = useTranslation();
   const { signIn, isLoading, error } = useAuthStore();
   const [form] = Form.useForm();
@@ -30,6 +31,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword })
     // 错误信息由 AuthStore 中的错误状态处理
     if (!useAuthStore.getState().error) {
       message.success(t('loginSuccess'));
+      // 如果提供了成功回调函数，则调用
+      if (onSuccess) {
+        onSuccess();
+      }
     }
   };
 

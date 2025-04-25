@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Result, Spin, Button } from 'antd';
+import { Button, Result, Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/utils/supabase';
+import { useNavigate, useLoaderData } from 'react-router';
+import { useAuthStore } from '@/store/authStore';
+
+// 加载器返回的数据类型
+interface LoaderData {
+  token?: string;
+  error?: string;
+}
 
 /**
  * 认证回调组件
@@ -9,59 +16,51 @@ import { supabase } from '@/utils/supabase';
  */
 const AuthCallback: React.FC = () => {
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+  const navigate = useNavigate();
+  const { token, error: loaderError } = useLoaderData() as LoaderData;
+  const { verifyEmail } = useAuthStore();
+  
+  const [isVerifying, setIsVerifying] = useState(true);
+  const [error, setError] = useState<string | null>(loaderError || null);
+  
+  // 导航到首页
+  const goToHome = () => {
+    navigate('/', { replace: true });
+  };
+  
+  // 使用 token 验证邮箱
   useEffect(() => {
-    const handleCallback = async () => {
+    if (!token) {
+      setIsVerifying(false);
+      return;
+    }
+    
+    const verify = async () => {
       try {
-        // 获取 URL 参数
-        const params = new URLSearchParams(window.location.search);
-        
-        // 如果有错误参数，显示错误信息
-        if (params.get('error')) {
-          setError(params.get('error_description') || 'Authentication error');
-          setIsLoading(false);
-          return;
-        }
-        
-        // Supabase 会自动处理 URL 参数中的令牌
-        // 这里我们只需要等待一会儿，然后重新获取会话
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          throw error;
-        }
-        
-        // 如果有会话，说明成功
-        if (!data.session) {
-          // 如果没有会话，可能是其他类型的回调
-          setError('未能完成认证过程，请尝试重新登录');
+        const result = await verifyEmail(token);
+        if (!result.success) {
+          setError(result.error || t('authenticationError'));
         }
       } catch (err) {
-        console.error('处理认证回调时出错:', err);
-        setError('处理认证回调时出错');
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
-        setIsLoading(false);
+        setIsVerifying(false);
       }
     };
-
-    handleCallback();
-  }, []);
-
-  // 重定向到主页
-  const goToHome = () => {
-    window.location.href = '/';
-  };
-
-  if (isLoading) {
+    
+    verify();
+  }, [token, verifyEmail, t]);
+  
+  // 验证中显示加载状态
+  if (isVerifying) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4">
         <Spin size="large" tip={t('verifyingEmail')} />
       </div>
     );
   }
-
+  
+  // 验证失败显示错误
   if (error) {
     return (
       <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4">
@@ -78,7 +77,8 @@ const AuthCallback: React.FC = () => {
       </div>
     );
   }
-
+  
+  // 验证成功显示结果
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4">
       <Result

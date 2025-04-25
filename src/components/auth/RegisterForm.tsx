@@ -4,13 +4,14 @@ import { LockOutlined, MailOutlined, SendOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 
-const { Title, Text, Link, Paragraph } = Typography;
+const { Title, Text, Link } = Typography;
 
 interface RegisterFormProps {
   onToggleForm: () => void;
+  onSuccess?: () => void;
 }
 
-const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm }) => {
+const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm, onSuccess }) => {
   const { t } = useTranslation();
   const { signUp, resendConfirmationEmail, isLoading, error } = useAuthStore();
   const [form] = Form.useForm();
@@ -39,6 +40,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm }) => {
       } else {
         message.success(t('registerSuccess'));
         form.resetFields();
+        
+        // 如果提供了成功回调函数，则调用
+        if (onSuccess) {
+          onSuccess();
+        }
       }
     }
   };
@@ -101,8 +107,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm }) => {
           ]}
         >
           <div className="text-center">
-            <Paragraph>{t('emailSentTo')}: <Text strong>{registeredEmail}</Text></Paragraph>
-            <Paragraph>{t('checkSpamFolder')}</Paragraph>
+            <Text>{t('emailSentTo')}: <Text strong>{registeredEmail}</Text></Text>
+            <br />
+            <Text type="secondary">{t('checkSpamFolder')}</Text>
           </div>
         </Result>
       </Card>

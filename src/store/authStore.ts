@@ -17,6 +17,7 @@ interface AuthState {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   resendConfirmationEmail: (email: string) => Promise<void>;
+  verifyEmail: (token: string) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -220,6 +221,42 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false, 
         error: error instanceof AuthError ? error.message : '重置密码失败' 
       });
+    }
+  },
+  
+  // 验证邮箱
+  verifyEmail: async (token: string) => {
+    try {
+      // Supabase 会自动处理从 URL 获取的 token
+      // 当页面加载时就已经处理了 token
+      // 我们只需在此获取会话状态
+      console.log('使用token验证邮箱:', token);
+      
+      // 获取当前会话
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      // 如果有会话，说明验证成功
+      if (session) {
+        // 更新store中的会话信息
+        set({ 
+          session,
+          user: session.user,
+          error: null
+        });
+        return { success: true };
+      }
+      
+      return { success: false, error: '邮箱验证失败' };
+    } catch (error) {
+      console.error('邮箱验证错误:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : '邮箱验证过程中发生错误' 
+      };
     }
   }
 })); 

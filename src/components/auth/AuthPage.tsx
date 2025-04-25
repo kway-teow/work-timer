@@ -46,7 +46,7 @@ const AuthPage: React.FC = () => {
       </div>
     );
   }
-  
+
   // 如果用户已登录，返回 null，由 AuthGuard 来决定渲染内容
   if (user) {
     return null;
