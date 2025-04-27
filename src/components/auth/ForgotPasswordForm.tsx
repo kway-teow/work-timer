@@ -3,6 +3,7 @@ import { Form, Input, Button, message, Card, Typography } from 'antd';
 import { MailOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
+// 注意：此组件使用isResetPasswordLoading替代isLoading('resetPassword')更明确地表示重置密码的加载状态
 
 const { Title, Text, Link } = Typography;
 
@@ -12,7 +13,7 @@ interface ForgotPasswordFormProps {
 
 const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }) => {
   const { t } = useTranslation();
-  const { resetPassword, isLoading, error } = useAuthStore();
+  const { resetPassword, isResetPasswordLoading, error } = useAuthStore();
   const [form] = Form.useForm();
 
   // 使用 useEffect 处理错误提示
@@ -58,7 +59,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
             prefix={<MailOutlined className="text-gray-400" />}
             placeholder={t('email')}
             size="large"
-            disabled={isLoading}
+            disabled={isResetPasswordLoading}
           />
         </Form.Item>
 
@@ -68,7 +69,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onBackToLogin }
             htmlType="submit"
             size="large"
             block
-            loading={isLoading}
+            loading={isResetPasswordLoading}
             className="bg-blue-500 hover:bg-blue-600"
           >
             {t('sendResetLink')}

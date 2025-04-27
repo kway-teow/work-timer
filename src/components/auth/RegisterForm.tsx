@@ -3,6 +3,8 @@ import { Form, Input, Button, message, Card, Typography, Result, Skeleton, Space
 import { LockOutlined, MailOutlined, SendOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
+// 注意：此组件使用isSignUpLoading替代通用isLoading表示注册过程的加载状态
+// 并使用isResendConfirmationLoading替代局部状态resendLoading表示重发确认邮件的加载状态
 
 const { Title, Text, Link } = Typography;
 
@@ -13,11 +15,10 @@ interface RegisterFormProps {
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm, onSuccess }) => {
   const { t } = useTranslation();
-  const { signUp, resendConfirmationEmail, isLoading, error } = useAuthStore();
+  const { signUp, resendConfirmationEmail, isSignUpLoading, isResendConfirmationLoading, error } = useAuthStore();
   const [form] = Form.useForm();
   const [registeredEmail, setRegisteredEmail] = useState<string>('');
   const [showConfirmationMessage, setShowConfirmationMessage] = useState(false);
-  const [resendLoading, setResendLoading] = useState(false);
 
   // 使用 useEffect 处理错误提示
   useEffect(() => {
@@ -53,9 +54,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm, onSuccess }) 
   const handleResendConfirmation = async () => {
     if (!registeredEmail) return;
     
-    setResendLoading(true);
     await resendConfirmationEmail(registeredEmail);
-    setResendLoading(false);
     
     if (!useAuthStore.getState().error) {
       message.success(t('confirmationEmailResent'));
@@ -65,7 +64,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm, onSuccess }) 
   // 显示确认邮箱的提示信息
   if (showConfirmationMessage) {
     // 重发邮件时的加载状态显示骨架屏
-    if (resendLoading) {
+    if (isResendConfirmationLoading) {
       return (
         <Card className="max-w-md w-full shadow-md">
           <Space direction="vertical" align="center" style={{ width: '100%' }}>
@@ -93,7 +92,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm, onSuccess }) 
               key="resend" 
               type="primary" 
               icon={<SendOutlined />}
-              loading={resendLoading}
+              loading={isResendConfirmationLoading}
               onClick={handleResendConfirmation}
             >
               {t('resendConfirmationEmail')}
@@ -117,7 +116,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm, onSuccess }) 
   }
 
   // 在表单加载状态下显示骨架屏
-  if (isLoading) {
+  if (isSignUpLoading) {
     return (
       <Card className="max-w-md w-full shadow-md">
         <div className="text-center mb-6">
@@ -166,7 +165,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm, onSuccess }) 
             prefix={<MailOutlined className="text-gray-400" />}
             placeholder={t('email')}
             size="large"
-            disabled={isLoading}
+            disabled={isSignUpLoading}
           />
         </Form.Item>
 
@@ -181,7 +180,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm, onSuccess }) 
             prefix={<LockOutlined className="text-gray-400" />}
             placeholder={t('password')}
             size="large"
-            disabled={isLoading}
+            disabled={isSignUpLoading}
           />
         </Form.Item>
 
@@ -204,7 +203,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm, onSuccess }) 
             prefix={<LockOutlined className="text-gray-400" />}
             placeholder={t('confirmPassword')}
             size="large"
-            disabled={isLoading}
+            disabled={isSignUpLoading}
           />
         </Form.Item>
 
@@ -214,7 +213,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onToggleForm, onSuccess }) 
             htmlType="submit"
             size="large"
             block
-            loading={isLoading}
+            loading={isSignUpLoading}
             className="bg-blue-500 hover:bg-blue-600"
           >
             {t('register')}

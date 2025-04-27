@@ -3,6 +3,7 @@ import { Form, Input, Button, Card, Typography, message, Skeleton, Space } from 
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
+// 注意：此组件使用isSignInLoading替代通用isLoading来表示登录过程的加载状态
 
 const { Title, Text, Link } = Typography;
 
@@ -14,7 +15,8 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword, onSuccess }) => {
   const { t } = useTranslation();
-  const { signIn, isLoading, error } = useAuthStore();
+  // 使用特定的登录加载状态，替代通用的isLoading
+  const { signIn, isSignInLoading, error } = useAuthStore();
   const [form] = Form.useForm();
 
   // 使用 useEffect 处理错误提示
@@ -38,8 +40,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword, o
     }
   };
 
-  // 加载状态下显示骨架屏
-  if (isLoading) {
+  // 加载状态下显示骨架屏 - 使用isSignInLoading替代通用的isLoading
+  if (isSignInLoading) {
     return (
       <Card className="max-w-md w-full shadow-md">
         <div className="text-center mb-6">
@@ -88,7 +90,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword, o
             prefix={<UserOutlined className="text-gray-400" />}
             placeholder={t('email')}
             size="large"
-            disabled={isLoading}
+            // 使用特定的登录加载状态禁用输入
+            disabled={isSignInLoading}
           />
         </Form.Item>
 
@@ -100,7 +103,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword, o
             prefix={<LockOutlined className="text-gray-400" />}
             placeholder={t('password')}
             size="large"
-            disabled={isLoading}
+            // 使用特定的登录加载状态禁用输入
+            disabled={isSignInLoading}
           />
         </Form.Item>
 
@@ -110,7 +114,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword, o
             htmlType="submit"
             size="large"
             block
-            loading={isLoading}
+            // 使用特定的登录加载状态控制按钮的加载状态
+            loading={isSignInLoading}
             className="bg-blue-500 hover:bg-blue-600"
           >
             {t('login')}

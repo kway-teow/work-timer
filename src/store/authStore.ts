@@ -2,13 +2,25 @@ import { create } from 'zustand';
 import { supabase } from '@/utils/supabase';
 import { Session, User, AuthError } from '@supabase/supabase-js';
 
+
 interface AuthState {
   // 认证状态
   user: User | null;
   session: Session | null;
-  isLoading: boolean;
   isInitialized: boolean;
   error: string | null;
+  
+  // 加载状态布尔值 - 直接暴露给组件使用
+  isInitializeLoading: boolean;
+  isSignInLoading: boolean;
+  isSignUpLoading: boolean;
+  isSignOutLoading: boolean;
+  isResetPasswordLoading: boolean;
+  isResendConfirmationLoading: boolean;
+  isVerifyEmailLoading: boolean;
+  
+  // 辅助方法 - 检查是否有任何加载状态为 true
+  isAnyLoading: () => boolean;
   
   // 认证方法
   initialize: () => Promise<void>;
@@ -23,9 +35,40 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
-  isLoading: true,
   isInitialized: false,
   error: null,
+  
+  // 加载状态初始化
+  isInitializeLoading: true,  // 初始化时设为 true
+  isSignInLoading: false,
+  isSignUpLoading: false, 
+  isSignOutLoading: false,
+  isResetPasswordLoading: false,
+  isResendConfirmationLoading: false,
+  isVerifyEmailLoading: false,
+  
+  // 检查是否有任何加载状态
+  isAnyLoading: () => {
+    const { 
+      isInitializeLoading,
+      isSignInLoading,
+      isSignUpLoading,
+      isSignOutLoading,
+      isResetPasswordLoading,
+      isResendConfirmationLoading,
+      isVerifyEmailLoading
+    } = get();
+    
+    return (
+      isInitializeLoading ||
+      isSignInLoading ||
+      isSignUpLoading ||
+      isSignOutLoading ||
+      isResetPasswordLoading ||
+      isResendConfirmationLoading ||
+      isVerifyEmailLoading
+    );
+  },
   
   // 初始化认证状态
   initialize: async () => {
@@ -35,7 +78,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     
     try {
-      set({ isLoading: true, error: null });
+      set({ isInitializeLoading: true, error: null });
       
       // 获取当前会话
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -47,7 +90,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ 
         session, 
         user: session?.user || null,
-        isLoading: false,
+        isInitializeLoading: false,
         isInitialized: true
       });
       
@@ -63,7 +106,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('认证初始化错误:', error);
       set({ 
-        isLoading: false,
+        isInitializeLoading: false,
         isInitialized: true,
         error: error instanceof AuthError ? error.message : '认证初始化错误' 
       });
@@ -73,7 +116,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // 用户登录
   signIn: async (email: string, password: string) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ isSignInLoading: true, error: null });
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -87,7 +130,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // 检查邮箱是否已经确认
       if (data.user && !data.user.email_confirmed_at) {
         set({ 
-          isLoading: false,
+          isSignInLoading: false,
           error: '请先确认您的邮箱后再登录'
         });
         return;
@@ -96,13 +139,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ 
         session: data.session, 
         user: data.user,
-        isLoading: false,
+        isSignInLoading: false,
         error: null
       });
     } catch (error) {
       console.error('登录错误:', error);
       set({ 
-        isLoading: false, 
+        isSignInLoading: false, 
         error: error instanceof AuthError ? error.message : '登录失败' 
       });
     }
@@ -111,7 +154,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // 用户注册
   signUp: async (email: string, password: string) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ isSignUpLoading: true, error: null });
       
       // 配置注册选项，要求邮箱确认
       const { data, error } = await supabase.auth.signUp({
@@ -133,7 +176,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // 如果已经创建了会话（少数情况），则设置用户信息
         session: data.session, 
         user: data.user,
-        isLoading: false,
+        isSignUpLoading: false,
         error: null
       });
       
@@ -141,7 +184,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('注册错误:', error);
       set({ 
-        isLoading: false, 
+        isSignUpLoading: false, 
         error: error instanceof AuthError ? error.message : '注册失败' 
       });
       return { isConfirmEmailSent: false };
@@ -151,7 +194,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // 重新发送确认邮件
   resendConfirmationEmail: async (email: string) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ isResendConfirmationLoading: true, error: null });
       
       const { error } = await supabase.auth.resend({
         type: 'signup',
@@ -165,11 +208,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         throw error;
       }
       
-      set({ isLoading: false });
+      set({ isResendConfirmationLoading: false });
     } catch (error) {
       console.error('重发确认邮件错误:', error);
       set({ 
-        isLoading: false, 
+        isResendConfirmationLoading: false, 
         error: error instanceof AuthError ? error.message : '重发确认邮件失败' 
       });
     }
@@ -178,7 +221,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // 用户登出
   signOut: async () => {
     try {
-      set({ isLoading: true, error: null });
+      set({ isSignOutLoading: true, error: null });
       
       const { error } = await supabase.auth.signOut();
       
@@ -189,13 +232,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ 
         session: null, 
         user: null,
-        isLoading: false,
+        isSignOutLoading: false,
         error: null
       });
     } catch (error) {
       console.error('登出错误:', error);
       set({ 
-        isLoading: false, 
+        isSignOutLoading: false, 
         error: error instanceof AuthError ? error.message : '登出失败' 
       });
     }
@@ -204,8 +247,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // 重置密码
   resetPassword: async (email: string) => {
     try {
-      set({ isLoading: true, error: null });
-      // TODO 改造为react-router-dom
+      set({ isResetPasswordLoading: true, error: null });
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`
       });
@@ -214,26 +257,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         throw error;
       }
       
-      set({ isLoading: false, error: null });
+      set({ isResetPasswordLoading: false, error: null });
     } catch (error) {
       console.error('重置密码错误:', error);
       set({ 
-        isLoading: false, 
+        isResetPasswordLoading: false,
         error: error instanceof AuthError ? error.message : '重置密码失败' 
       });
     }
   },
   
   // 验证邮箱
-  verifyEmail: async (token: string) => {
+  verifyEmail: async () => {
     try {
+      set({ isVerifyEmailLoading: true });
+      
       // Supabase 会自动处理从 URL 获取的 token
       // 当页面加载时就已经处理了 token
       // 我们只需在此获取会话状态
-      console.log('使用token验证邮箱:', token);
       
       // 获取当前会话
       const { data: { session }, error } = await supabase.auth.getSession();
+      
+      set({ isVerifyEmailLoading: false });
       
       if (error) {
         return { success: false, error: error.message };
@@ -253,6 +299,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { success: false, error: '邮箱验证失败' };
     } catch (error) {
       console.error('邮箱验证错误:', error);
+      set({ isVerifyEmailLoading: false });
       return { 
         success: false, 
         error: error instanceof Error ? error.message : '邮箱验证过程中发生错误' 

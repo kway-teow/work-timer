@@ -14,7 +14,8 @@ enum AuthView {
 
 const AuthPage: React.FC = () => {
   const { t } = useTranslation();
-  const { user, isLoading } = useAuthStore();
+  // 使用isInitializeLoading替代通用isLoading更明确地表示认证初始化的加载状态
+  const { user, isInitializeLoading } = useAuthStore();
   const [currentView, setCurrentView] = useState<AuthView>(AuthView.LOGIN);
 
   // 切换到登录视图
@@ -25,7 +26,6 @@ const AuthPage: React.FC = () => {
   
   // 切换到忘记密码视图
   const showForgotPassword = () => setCurrentView(AuthView.FORGOT_PASSWORD);
-
   // 根据当前视图显示不同的表单
   const renderAuthForm = () => {
     switch (currentView) {
@@ -39,7 +39,7 @@ const AuthPage: React.FC = () => {
   };
 
   // 正在加载时显示加载指示器
-  if (isLoading) {
+  if (isInitializeLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <Spin size="large" tip={t('loading')} />

@@ -1,16 +1,17 @@
 import React from 'react';
-import { Layout } from 'antd';
 import ResetPasswordForm from './ResetPasswordForm';
 
-const { Content } = Layout;
-
+/**
+ * 重置密码页面
+ * 整体布局与AuthPage保持一致，提供统一的用户体验
+ */
 const ResetPasswordPage: React.FC = () => {
   return (
-    <Layout className="min-h-screen bg-gray-100">
-      <Content className="flex justify-center items-center p-4">
+    <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4">
+      <div className="w-full max-w-md">
         <ResetPasswordForm />
-      </Content>
-    </Layout>
+      </div>
+    </div>
   );
 };
 

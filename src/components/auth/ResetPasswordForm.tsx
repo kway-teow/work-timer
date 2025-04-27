@@ -1,22 +1,36 @@
-import React, { useState } from 'react';
-import { Form, Input, Button, message, Card, Typography } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Form, Input, Button, message, Card, Typography, Skeleton, Space } from 'antd';
 import { LockOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '@/utils/supabase';
+import { useAuthStore } from '@/store/authStore';
 
 const { Title, Text } = Typography;
 
+/**
+ * 重置密码表单组件
+ * 样式与布局与其他认证表单保持一致
+ */
 const ResetPasswordForm: React.FC = () => {
   const { t } = useTranslation();
   const [form] = Form.useForm();
-  const [isLoading, setIsLoading] = useState(false);
+  const { error, isVerifyEmailLoading } = useAuthStore();
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // 处理错误提示
+  useEffect(() => {
+    if (error) {
+      message.error(error);
+    }
+  }, [error]);
 
   // 重置密码处理
   const handleSubmit = async (values: { password: string }) => {
     try {
-      setIsLoading(true);
+      setIsUpdatingPassword(true);
       
+      // 直接使用Supabase API更新密码
       const { error } = await supabase.auth.updateUser({
         password: values.password
       });
@@ -37,9 +51,32 @@ const ResetPasswordForm: React.FC = () => {
       console.error('重置密码错误:', error);
       message.error(error instanceof Error ? error.message : '重置密码失败');
     } finally {
-      setIsLoading(false);
+      setIsUpdatingPassword(false);
     }
   };
+
+  // 显示加载状态
+  const isLoading = isVerifyEmailLoading || isUpdatingPassword;
+
+  // 加载状态下显示骨架屏
+  if (isLoading && !isSuccess) {
+    return (
+      <Card className="max-w-md w-full shadow-md">
+        <div className="text-center mb-6">
+          <Skeleton.Input active style={{ width: 150 }} />
+          <div className="mt-2">
+            <Skeleton.Input active style={{ width: 250 }} />
+          </div>
+        </div>
+
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <Skeleton.Input active block style={{ height: 40 }} />
+          <Skeleton.Input active block style={{ height: 40 }} />
+          <Skeleton.Button active block style={{ height: 40 }} />
+        </Space>
+      </Card>
+    );
+  }
 
   // 如果成功重置，显示成功信息
   if (isSuccess) {
@@ -78,6 +115,7 @@ const ResetPasswordForm: React.FC = () => {
             prefix={<LockOutlined className="text-gray-400" />}
             placeholder={t('newPassword')}
             size="large"
+            disabled={isLoading}
           />
         </Form.Item>
 
@@ -100,6 +138,7 @@ const ResetPasswordForm: React.FC = () => {
             prefix={<LockOutlined className="text-gray-400" />}
             placeholder={t('confirmPassword')}
             size="large"
+            disabled={isLoading}
           />
         </Form.Item>
 
