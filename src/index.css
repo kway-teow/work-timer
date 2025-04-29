@@ -1,7 +1,7 @@
 /* Tailwind CSS */
 @import "tailwindcss";
 
-/* Global styles */
+/* 全局样式 */
 :root {
   --min-page-width: 320px;
 }
@@ -11,22 +11,27 @@ html, body {
   overflow-x: auto;
 }
 
-/* Ensure content area has minimum width */
+/* 确保内容区域有最小宽度 */
 .ant-layout-content {
   min-width: var(--min-page-width);
 }
 
-/* Card content minimum width */
+/* 卡片内容最小宽度 */
 .ant-card, .ant-card-body {
-  min-width: calc(var(--min-page-width) - 48px); /* Subtract padding space */
+  min-width: calc(var(--min-page-width) - 48px); /* 减去内边距空间 */
 }
 
-/* Ensure single lines don't break due to minimum width issues */
+/* 确保单行文本不会因最小宽度问题而断行 */
 .ant-card-head-title {
   white-space: normal !important;
 }
 
-/* Improved mobile compatibility */
+/* 使用 Tailwind 的自定义最小宽度类 */
+.system-min-width {
+  @apply min-w-[var(--min-page-width)];
+}
+
+/* 移动端兼容性优化 */
 @media (max-width: 480px) {
   .ant-segmented {
     font-size: 12px;
@@ -36,13 +41,13 @@ html, body {
     border-radius: 8px;
   }
   
-  /* Adapt form elements for mobile */
+  /* 为移动端调整表单元素 */
   .ant-form-item-label {
     padding-bottom: 4px;
   }
 }
 
-/* Custom button radius */
+/* 自定义按钮圆角 */
 .rounded-button {
   border-radius: 0.5rem !important;
 }

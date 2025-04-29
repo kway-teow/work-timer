@@ -18,7 +18,6 @@ import { useWorkRecords } from '@/hooks';
 dayjs.extend(isBetween);
 
 // 全局最小宽度，用于一致的显示效果
-const MIN_WIDTH = '320px';
 
 const WorkTimer: React.FC = () => {
   const { t } = useTranslation();
@@ -158,7 +157,7 @@ const WorkTimer: React.FC = () => {
   // 如果正在加载，显示骨架屏
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50" style={{ minWidth: MIN_WIDTH }}>
+      <div className="min-h-screen bg-gray-5 system-min-width">
         {/* 页头骨架 */}
         <div className="h-16 border-b border-gray-200 px-4 flex items-center justify-between">
           <Skeleton.Button active style={{ width: 120 }} />
@@ -193,12 +192,12 @@ const WorkTimer: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ minWidth: MIN_WIDTH }}>
+    <div className="min-h-screen bg-gray-50 system-min-width">
       {/* 页头 */}
       <Header />
       
       {/* 主要内容 */}
-      <div className="pt-16 px-4 pb-24" style={{ minWidth: MIN_WIDTH }}>
+      <div className="pt-16 sm:pt-16 md:pt-16 lg:pt-16 px-4 pb-24 system-min-width">
         {/* 统计卡片 */}
         <StatisticsCards
           weeklyHours={weeklyHours}

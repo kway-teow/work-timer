@@ -7,7 +7,6 @@ import SyncButton from './SyncButton';
 import { useAuthStore } from '@/store/authStore';
 
 // 匹配WorkTimer中使用的最小宽度
-const MIN_WIDTH = '320px';
 
 const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -23,21 +22,20 @@ const Header: React.FC = () => {
 
   return (
     <div 
-      className="fixed top-0 left-0 right-0 bg-white shadow-sm z-10 px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0"
-      style={{ minWidth: MIN_WIDTH }}
+      className="fixed top-0 left-0 right-0 bg-white shadow-sm z-10 px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0 system-min-width"
     >
-      <h1 className="text-xl font-semibold text-gray-800">{t('appTitle')}</h1>
-      <div className="flex items-center">
+      <h1 className="text-xl font-semibold text-gray-800 mb-1 sm:mb-0">{t('appTitle')}</h1>
+      <div className="flex items-center flex-wrap justify-center">
         {user && (
           <>
             <SyncButton />
-            <Divider type="vertical" className="mx-3 h-5" />
+            <Divider type="vertical" className="h-5" />
             <UserStatus />
-            <Divider type="vertical" className="mx-3 h-5" />
+            <Divider type="vertical" className="h-5" />
           </>
         )}
         <div className="flex items-center">
-          <GlobalOutlined className="mr-2 text-gray-600" />
+          <GlobalOutlined className="mr-1 text-gray-600" />
           <Segmented
             value={currentLanguage === 'zh-CN' ? 'zh-CN' : 'en'}
             onChange={handleLanguageChange}

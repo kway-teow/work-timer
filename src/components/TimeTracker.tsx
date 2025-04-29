@@ -93,7 +93,7 @@ const TimeTracker: React.FC = () => {
 
   return (
     <Layout className="min-h-screen bg-gray-50">
-      <Content className="w-full max-w-7xl mx-auto min-w-[320px] px-2 sm:px-3 py-4 md:p-6">
+      <Content className="w-full max-w-7xl mx-auto system-min-width px-2 sm:px-3 py-4 md:p-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <Title level={3} className="md:text-3xl mb-4 md:mb-0 !leading-tight">
             {t('appTitle')}
