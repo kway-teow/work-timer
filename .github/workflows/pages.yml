@@ -8,6 +8,7 @@ on:
       - 'src/**'
       - '.github/workflows/pages.yml'
       - 'vite.config.ts'
+      - 'CNAME'
       
 jobs:
   deploy-pages:
@@ -32,6 +33,9 @@ jobs:
 
       - name: Generate pages
         run: pnpm build
+
+      - name: Copy CNAME to dist
+        run: cp CNAME ./dist/
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
