@@ -23,7 +23,7 @@ const Header: React.FC = () => {
 
   return (
     <div 
-      className="fixed top-0 left-0 right-0 bg-white shadow-sm z-10 px-4 py-3 flex justify-between items-center"
+      className="fixed top-0 left-0 right-0 bg-white shadow-sm z-10 px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0"
       style={{ minWidth: MIN_WIDTH }}
     >
       <h1 className="text-xl font-semibold text-gray-800">{t('appTitle')}</h1>
