@@ -116,5 +116,10 @@
   "pageNotFoundDescription": "The page you are looking for does not exist or has been removed",
   "error": "Error",
   "somethingWentWrong": "Something went wrong, please try again later",
-  "tryAgain": "Try Again"
+  "tryAgain": "Try Again",
+  "exportRecord": "Export Records",
+  "exportTooltip": "Export records to clipboard (Tab separated)",
+  "exportSuccess": "Records copied to clipboard",
+  "exportError": "Failed to copy records",
+  "exportForWps": "Export for WPS/KingDocs"
 } 

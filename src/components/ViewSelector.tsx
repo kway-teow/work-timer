@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfigStore } from '@/store/configStore';
+import ExportButton from './ExportButton';
+import { useWorkRecords } from '@/hooks';
 
 const ViewSelector: React.FC = () => {
   const { t } = useTranslation();
@@ -10,6 +12,9 @@ const ViewSelector: React.FC = () => {
     setShowChart, 
     setShowTimeline 
   } = useConfigStore();
+  
+  // 获取工时记录
+  const { records } = useWorkRecords();
 
   const handleRecordsView = () => {
     setShowChart(false);
@@ -27,8 +32,8 @@ const ViewSelector: React.FC = () => {
   };
 
   return (
-    <div className="mt-4 flex justify-between items-center">
-      <div className="flex space-x-4">
+    <div className="mt-4 flex justify-between items-center flex-wrap gap-2">
+      <div className="flex space-x-4 flex-wrap gap-2">
         <button
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             !showChart && !showTimeline
@@ -56,6 +61,9 @@ const ViewSelector: React.FC = () => {
           {t('hoursTrend')}
         </button>
       </div>
+      
+      {/* 导出按钮 */}
+      <ExportButton records={records} />
     </div>
   );
 };

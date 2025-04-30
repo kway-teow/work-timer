@@ -116,5 +116,10 @@
   "pageNotFoundDescription": "您访问的页面不存在或已被移除",
   "error": "错误",
   "somethingWentWrong": "出了点问题，请稍后再试",
-  "tryAgain": "重试"
+  "tryAgain": "重试",
+  "exportRecord": "导出记录",
+  "exportTooltip": "导出记录到剪贴板（制表符分隔）",
+  "exportSuccess": "记录已复制到剪贴板",
+  "exportError": "复制记录失败",
+  "exportForWps": "导出到金山文档"
 } 
