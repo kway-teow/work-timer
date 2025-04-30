@@ -1,18 +1,32 @@
 import React from 'react';
 import { Button, Dropdown, Avatar, Space, message } from 'antd';
-import { UserOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
+import { UserOutlined, LogoutOutlined, SettingOutlined, SyncOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/authStore';
 import { useTranslation } from 'react-i18next';
 import type { MenuProps } from 'antd';
+import { useWorkRecordStore } from '@/store/workRecordStore';
+import LanguageSelector from '../LanguageSelector';
 
 const UserStatus: React.FC = () => {
   const { t } = useTranslation();
   const { user, signOut } = useAuthStore();
+  const { syncToDatabase, isSyncing } = useWorkRecordStore();
 
   // 处理登出
   const handleSignOut = async () => {
     await signOut();
     message.success(t('signedOut'));
+  };
+
+  // 处理同步
+  const handleSync = async () => {
+    const result = await syncToDatabase();
+    
+    if (result.success) {
+      message.success(result.message);
+    } else {
+      message.error(result.message);
+    }
   };
 
   // 如果没有用户，不显示任何内容
@@ -27,8 +41,25 @@ const UserStatus: React.FC = () => {
       label: <span className="text-gray-600">{user.email}</span>,
     },
     {
-      key: 'divider',
+      key: 'divider1',
       type: 'divider',
+    },
+    {
+      key: 'sync',
+      icon: <SyncOutlined spin={isSyncing} />,
+      label: isSyncing ? t('syncing') : t('sync'),
+      onClick: handleSync,
+      className: 'sm:hidden', // Only show on small screens
+    },
+    {
+      key: 'language',
+      label: <LanguageSelector />,
+      className: 'sm:hidden', // Only show on small screens
+    },
+    {
+      key: 'divider2',
+      type: 'divider',
+      className: 'sm:hidden', // Only show on small screens
     },
     {
       key: 'settings',
