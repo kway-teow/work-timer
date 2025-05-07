@@ -121,5 +121,5 @@
   "exportTooltip": "Export records to clipboard (Tab separated)",
   "exportSuccess": "Records copied to clipboard",
   "exportError": "Failed to copy records",
-  "exportForWps": "Export for WPS/KingDocs"
+  "exportForWps": "Export for Docs"
 } 

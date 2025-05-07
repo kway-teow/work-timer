@@ -123,6 +123,7 @@ const StatisticsCards: React.FC<StatisticsCardsProps> = ({
                   format="YYYY年MM月"
                   variant="borderless"
                   suffixIcon={null}
+                  inputReadOnly
                 />
               </div>
               <Statistic

@@ -1,8 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useConfigStore } from '@/store/configStore';
-import ExportButton from './ExportButton';
-import { useWorkRecords } from '@/hooks';
 
 const ViewSelector: React.FC = () => {
   const { t } = useTranslation();
@@ -12,9 +10,6 @@ const ViewSelector: React.FC = () => {
     setShowChart, 
     setShowTimeline 
   } = useConfigStore();
-  
-  // 获取工时记录
-  const { records } = useWorkRecords();
 
   const handleRecordsView = () => {
     setShowChart(false);
@@ -61,9 +56,6 @@ const ViewSelector: React.FC = () => {
           {t('hoursTrend')}
         </button>
       </div>
-      
-      {/* 导出按钮 */}
-      <ExportButton records={records} />
     </div>
   );
 };

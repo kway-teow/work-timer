@@ -1,16 +1,20 @@
 import React from 'react';
 import { Button, Dropdown, Avatar, Space, message } from 'antd';
-import { UserOutlined, LogoutOutlined, SettingOutlined, SyncOutlined } from '@ant-design/icons';
+import { UserOutlined, LogoutOutlined, SettingOutlined, SyncOutlined, FileExcelOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/authStore';
 import { useTranslation } from 'react-i18next';
 import type { MenuProps } from 'antd';
 import { useWorkRecordStore } from '@/store/workRecordStore';
 import LanguageSelector from '../LanguageSelector';
+import { useWorkRecords } from '@/hooks';
+import { exportRecordsToClipboard } from '@/utils/exportUtils';
 
 const UserStatus: React.FC = () => {
   const { t } = useTranslation();
   const { user, signOut } = useAuthStore();
   const { syncToDatabase, isSyncing } = useWorkRecordStore();
+  // 获取工时记录
+  const { records } = useWorkRecords();
 
   // 处理登出
   const handleSignOut = async () => {
@@ -26,6 +30,22 @@ const UserStatus: React.FC = () => {
       message.success(result.message);
     } else {
       message.error(result.message);
+    }
+  };
+
+  // 处理导出到文档
+  const handleExport = async () => {
+    if (records.length === 0) {
+      message.warning(t('noRecords'));
+      return;
+    }
+
+    const success = await exportRecordsToClipboard(records);
+    
+    if (success) {
+      message.success(t('exportSuccess'));
+    } else {
+      message.error(t('exportError'));
     }
   };
 
@@ -50,6 +70,12 @@ const UserStatus: React.FC = () => {
       label: isSyncing ? t('syncing') : t('sync'),
       onClick: handleSync,
       className: 'sm:hidden', // Only show on small screens
+    },
+    {
+      key: 'export',
+      icon: <FileExcelOutlined />,
+      label: t('exportForWps'),
+      onClick: handleExport,
     },
     {
       key: 'language',

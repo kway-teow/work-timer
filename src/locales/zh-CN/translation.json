@@ -121,5 +121,5 @@
   "exportTooltip": "导出记录到剪贴板（制表符分隔）",
   "exportSuccess": "记录已复制到剪贴板",
   "exportError": "复制记录失败",
-  "exportForWps": "导出到金山文档"
+  "exportForWps": "导出到文档"
 } 
