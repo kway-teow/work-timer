@@ -13,5 +13,6 @@ export default defineConfig({
   server: {
     port: 13000,
     host: true,
+    allowedHosts: ['localhost', '127.0.0.1', '0.0.0.0', 'work-time.kwayteow.local'],
   },
 })
